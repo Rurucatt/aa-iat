@@ -18,14 +18,14 @@ define(['managerAPI',
 
     //Randomly select which of two sets of category labels to use.
     let raceSet = API.shuffle(['a','b'])[0];
-    let blackLabels = [];
+    let asianLabels = [];
     let whiteLabels = [];
 
     if (raceSet == 'a') {
-        blackLabels.push('African Americans');
-        whiteLabels.push('European Americans');
+        asianLabels.push('Asian Americans');
+        whiteLabels.push('White Americans');
     } else {
-        blackLabels.push('Black people');
+    	asianLabels.push('Asian American people');
         whiteLabels.push('White people');
     }
 
@@ -34,7 +34,7 @@ define(['managerAPI',
         //YBYB: change when copying back to the correct folder
         baseURL: './images/',
         raceSet:raceSet,
-        blackLabels:blackLabels,
+        asianLabels:asianLabels,
         whiteLabels:whiteLabels,
         //Select randomly what attribute words to see. 
         //Based on Axt, Feng, & Bar-Anan (2021).
