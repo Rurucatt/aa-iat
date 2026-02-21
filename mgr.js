@@ -22,11 +22,11 @@ define(['managerAPI',
     let whiteLabels = [];
 
     if (raceSet == 'a') {
-        asianLabels.push('Asian Americans faces');
-        whiteLabels.push('White faces');
+        asianLabels.push('Asian Americans');
+        whiteLabels.push('European Americans');
     } else {
-    	asianLabels.push('Asian American faces');
-        whiteLabels.push('White faces');
+    	asianLabels.push('Asian people');
+        whiteLabels.push('White people');
     }
 
     API.addGlobal({
