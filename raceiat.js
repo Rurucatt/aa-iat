@@ -11,12 +11,12 @@ define(['pipAPI','https://cdn.jsdelivr.net/gh/baranan/minno-tasks@0.*/IAT/iat10.
                 height : 4 //Used to position the "Or" in the combined block.
             }, 
             stimulusMedia : [ //Stimuli content as PIP's media objects
-                {image: 'bm1_nc.jpg'},
-                {image: 'bm2_nc.jpg'},
-                {image: 'bm3_nc.jpg'},
-                {image: 'bf1_nc.jpg'},
-                {image: 'bf2_nc.jpg'},                 
-                {image: 'bf3_nc.jpg'}     
+                {image: 'am00001.png'},
+                {image: 'am00002.png'},
+                {image: 'am00003.png'},
+                {image: 'af00001.png'},
+                {image: 'af00002.png'},                 
+                {image: 'af00003.png'}     
             ],
             //Stimulus css (style)
             stimulusCss : {color:'#31940F','font-size':'2.3em'}
@@ -29,12 +29,12 @@ define(['pipAPI','https://cdn.jsdelivr.net/gh/baranan/minno-tasks@0.*/IAT/iat10.
                 height : 4 //Used to position the "Or" in the combined block.
             }, 
             stimulusMedia : [ //Stimuli content as PIP's media objects
-                {image: 'wm1_nc.jpg'},
-                {image: 'wm2_nc.jpg'},
-                {image: 'wm3_nc.jpg'},
-                {image: 'wf1_nc.jpg'},
-                {image: 'wf2_nc.jpg'},
-                {image: 'wf3_nc.jpg'}
+                {image: 'wm00001.png'},
+                {image: 'wm00002.png'},
+                {image: 'wm00003.png'},
+                {image: 'wf00001.png'},
+                {image: 'wf00002.png'},
+                {image: 'wf00003.png'}
             ],
             //Stimulus css (style)
             stimulusCss : {color:'#31940F','font-size':'2.3em'}
