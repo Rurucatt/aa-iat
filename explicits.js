@@ -68,20 +68,20 @@ define(['questAPI'], function(Quest){
         name: 'attributes7',
         stem: 'Which statement best describes you?',
         answers: [
-            {text:'I strongly prefer <%= global.whiteLabels %> to <%= global.blackLabels %>.',value:7},
-            {text:'I moderately prefer <%= global.whiteLabels %> to <%= global.blackLabels %>.',value:6},
-            {text:'I slightly prefer <%= global.whiteLabels %> to <%= global.blackLabels %>.',value:5},
-            {text:'I like <%= global.whiteLabels %> and <%= global.blackLabels %> equally.',value:4},
-            {text:'I slightly prefer <%= global.blackLabels %> to <%= global.whiteLabels %>.',value:3},
-            {text:'I moderately prefer <%= global.blackLabels %> to <%= global.whiteLabels %>.',value:2},
-            {text:'I strongly prefer <%= global.blackLabels %> to <%= global.whiteLabels %>.',value:1}
+            {text:'I strongly prefer <%= global.whiteLabels %> to <%= global.asianLabels %>.',value:7},
+            {text:'I moderately prefer <%= global.whiteLabels %> to <%= global.asianLabels %>.',value:6},
+            {text:'I slightly prefer <%= global.whiteLabels %> to <%= global.asianLabels %>.',value:5},
+            {text:'I like <%= global.whiteLabels %> and <%= global.asianLabels %> equally.',value:4},
+            {text:'I slightly prefer <%= global.asianLabels %> to <%= global.whiteLabels %>.',value:3},
+            {text:'I moderately prefer <%= global.asianLabels %> to <%= global.whiteLabels %>.',value:2},
+            {text:'I strongly prefer <%= global.asianLabels %> to <%= global.whiteLabels %>.',value:1}
         ]
     });
 	
     API.addQuestionsSet('thermBlack',{
         inherit : 'therm',
         name: 'Tblack_0to10',
-        stem: 'How warm or cold do you feel towards <b><%= global.blackLabels %></b>?'
+        stem: 'How warm or cold do you feel towards <b><%= global.asianLabels %></b>?'
     });
 
     API.addQuestionsSet('thermWhite',{
