@@ -23,10 +23,10 @@ define(['managerAPI',
 
     if (raceSet == 'a') {
         asianLabels.push('Asian American');
-        whiteLabels.push('White');
+        whiteLabels.push('White American');
     } else {
     	asianLabels.push('Asian American');
-        whiteLabels.push('White');
+        whiteLabels.push('White American');
     }
 
     API.addGlobal({
