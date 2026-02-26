@@ -17,18 +17,21 @@ define(['managerAPI',
     API.addSettings('skip',true);
 
     //Randomly select which of two sets of category labels to use.
-    let raceSet = API.shuffle(['a','b'])[0];
-    let asianLabels = [];
-    let whiteLabels = [];
-
-    if (raceSet == 'a') {
-        asianLabels.push('Asian American');
-        whiteLabels.push('White American');
-    } else {
-    	asianLabels.push('Asian American');
-        whiteLabels.push('White American');
-    }
-
+    //let raceSet = API.shuffle(['a','b'])[0];
+    //let asianLabels = [];
+    //let whiteLabels = [];
+	
+    //if (raceSet == 'a') {
+      //asianLabels.push('Asian American');
+      //whiteLabels.push('White American');
+    //} else {
+    	//asianLabels.push('Asian American');
+        //whiteLabels.push('White American');
+    //}
+	
+	let asianLabels = ['Asian American'];
+	let whiteLabels = ['White American'];
+	
     API.addGlobal({
         raceiat:{},
         //YBYB: change when copying back to the correct folder
