@@ -1,4 +1,5 @@
-define(['managerAPI'], function(Manager){
+define(['managerAPI',
+		'https://cdn.jsdelivr.net/gh/minnojs/minno-datapipe@1.*/datapipe.min.js'], function(Manager){
 	
 	//You can use the commented-out code to get parameters from the URL.
 	//const queryString = window.location.search;
