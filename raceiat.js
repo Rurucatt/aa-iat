@@ -1,6 +1,11 @@
 
 
-define(['pipAPI','https://cdn.jsdelivr.net/gh/baranan/minno-tasks@0.*/IAT/iat10.js'], function(APIConstructor, iatExtension){
+define([
+    'pipAPI',
+    // Pin to a concrete iat10 implementation instead of using @0.* to avoid
+    // silent API changes that can ignore local trial-count overrides.
+    'https://cdn.jsdelivr.net/gh/baranan/minno-tasks@0.3.0/IAT/iat10.js'
+], function(APIConstructor, iatExtension){
     
     let API = new APIConstructor();
     let global = API.getGlobal();
