@@ -1,12 +1,16 @@
 
 
-define(['pipAPI','./iat10.js'],
-    function(APIConstructor, iatExtension){
+define(['pipAPI','./iat10.js'], function(APIConstructor, iatExtension){
     
     let API = new APIConstructor();
     let global = API.getGlobal();
       
     return iatExtension({
+        blockAttributes_nTrials: 14, // trial number of block 1
+        blockCategories_nTrials: 14, // block 2
+        blockFirstCombined_nTrials: 28, // block 3,6
+        blockSecondCombined_nTrials: 42, // block 4,7
+        blockSwitch_nTrials: 28,  // block 5, switch
 		
         category1 : {
             name : global.asianLabels, //Will appear in the data.
@@ -96,4 +100,3 @@ define(['pipAPI','./iat10.js'],
         isTouch : global.$isTouch
     });
 });
-
