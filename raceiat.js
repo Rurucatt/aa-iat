@@ -1,4 +1,9 @@
+
+
 define(['pipAPI','https://cdn.jsdelivr.net/gh/baranan/minno-tasks@0.*/IAT/iat10.js'], function(APIConstructor, iatExtension){
+
+    console.log('RACEIAT LOADED - VERSION 2026-02-28');
+    
     let API = new APIConstructor();
     let global = API.getGlobal();
 
