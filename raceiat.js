@@ -8,12 +8,6 @@ define(['pipAPI','./iat10.js'],
       
     return iatExtension({
 		
-	blockAttributes_nTrials: 14,
-  	blockCategories_nTrials: 14,
-  	blockFirstCombined_nTrials: 28,
-  	blockSecondCombined_nTrials: 42,
- 	blockSwitch_nTrials: 28,	
-		
         category1 : {
             name : global.asianLabels, //Will appear in the data.
             title : {
