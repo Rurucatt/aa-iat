@@ -3,12 +3,11 @@ define(['pipAPI','https://cdn.jsdelivr.net/gh/baranan/minno-tasks@0.*/IAT/iat10.
     let global = API.getGlobal();
 
     return iatExtension({
-        blockAttributes_nTrials: 14,
-        blockCategories_nTrials: 14,
-        blockFirstCombined_nTrials: 28,
-        blockSecondCombined_nTrials: 42,
-        blockSwitch_nTrials: 28,
-        
+        blockAttributes_nTrials: 14, //trial number of block 1
+        blockCategories_nTrials: 14, //block 2
+        blockFirstCombined_nTrials: 28, //block 3,6
+        blockSecondCombined_nTrials: 42, //block 4,7
+        blockSwitch_nTrials: 28,  //block 5, switch
         
         category1 : {
             name : global.asianLabels, //Will appear in the data.
