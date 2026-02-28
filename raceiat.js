@@ -6,7 +6,10 @@ define(['pipAPI','https://cdn.jsdelivr.net/gh/baranan/minno-tasks@0.*/IAT/iat10.
     let API = new APIConstructor();
     let global = API.getGlobal();
 
-    const trialConfig = {
+      
+    
+    return iatExtension({
+		
         blockAttributes_nTrials : 14,
 		blockAttributes_nMiniBlocks : 5,
 		blockCategories_nTrials : 14,
@@ -17,10 +20,7 @@ define(['pipAPI','https://cdn.jsdelivr.net/gh/baranan/minno-tasks@0.*/IAT/iat10.
 		blockSecondCombined_nMiniBlocks : 10, 
 		blockSwitch_nTrials : 28,
 		blockSwitch_nMiniBlocks : 7,
-    };    
-    
-    return iatExtension({
-        
+		
         category1 : {
             name : global.asianLabels, //Will appear in the data.
             title : {
