@@ -1,6 +1,6 @@
 
 
-define(['pipAPI','./iat10.js'], 
+define(['pipAPI','./iat10.js'],
     function(APIConstructor, iatExtension){
     
     let API = new APIConstructor();
