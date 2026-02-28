@@ -5,12 +5,23 @@ define(['pipAPI','https://cdn.jsdelivr.net/gh/baranan/minno-tasks@0.*/IAT/iat10.
     let API = new APIConstructor();
     let global = API.getGlobal();
 
+    const trialConfig = {
+        blockAttributes_nTrials: 14, // trial number of block 1
+        blockCategories_nTrials: 14, // block 2
+        blockFirstCombined_nTrials: 28, // block 3,6
+        blockSecondCombined_nTrials: 42, // block 4,7
+        blockSwitch_nTrials: 28,  // block 5, switch
+
+        // Compatibility fallback for iat10 builds that read nested block config.
+        blockAttributes: {nTrials: 14},
+        blockCategories: {nTrials: 14},
+        blockFirstCombined: {nTrials: 28},
+        blockSecondCombined: {nTrials: 42},
+        blockSwitch: {nTrials: 28}
+    };    
+    
     return iatExtension({
-        blockAttributes_nTrials: 14, //trial number of block 1
-        blockCategories_nTrials: 14, //block 2
-        blockFirstCombined_nTrials: 28, //block 3,6
-        blockSecondCombined_nTrials: 42, //block 4,7
-        blockSwitch_nTrials: 28,  //block 5, switch
+        ...trialConfig,
         
         category1 : {
             name : global.asianLabels, //Will appear in the data.
