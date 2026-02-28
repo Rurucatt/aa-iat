@@ -5,21 +5,14 @@ define(['pipAPI','https://cdn.jsdelivr.net/gh/baranan/minno-tasks@0.7.3/IAT/iat1
     
     let API = new APIConstructor();
     let global = API.getGlobal();
-
       
-    
     return iatExtension({
 		
-        blockAttributes_nTrials : 14,
-		blockAttributes_nMiniBlocks : 5,
-		blockCategories_nTrials : 14,
-		blockCategories_nMiniBlocks : 5,
-		blockFirstCombined_nTrials : 28,
-		blockFirstCombined_nMiniBlocks : 5,
-		blockSecondCombined_nTrials : 42, //Change to 0 if you want 5 blocks (you would probably want to increase blockFirstCombined_nTrials).
-		blockSecondCombined_nMiniBlocks : 10, 
-		blockSwitch_nTrials : 28,
-		blockSwitch_nMiniBlocks : 7,
+	blockAttributes_nTrials: 14,
+  	blockCategories_nTrials: 14,
+  	blockFirstCombined_nTrials: 28,
+  	blockSecondCombined_nTrials: 42,
+ 	blockSwitch_nTrials: 28,	
 		
         category1 : {
             name : global.asianLabels, //Will appear in the data.
