@@ -1,6 +1,6 @@
 
 
-define(['pipAPI','https://cdn.jsdelivr.net/gh/baranan/minno-tasks@0.*/IAT/iat10.js'], 
+define(['pipAPI','https://cdn.jsdelivr.net/gh/baranan/minno-tasks@0.7.3/IAT/iat10.js'], 
     function(APIConstructor, iatExtension){
     
     let API = new APIConstructor();
