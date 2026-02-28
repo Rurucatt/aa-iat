@@ -1,5 +1,5 @@
 define(['managerAPI',
-		'./iat10.js'], function(Manager){
+		'iat10.js'], function(Manager){
 
 
 	//You can use the commented-out code to get parameters from the URL.
