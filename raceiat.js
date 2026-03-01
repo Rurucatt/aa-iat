@@ -7,10 +7,19 @@ define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
       
     return iatExtension({
         blockAttributes_nTrials: 14, // trial number of block 1
+		blockAttributes_nMiniBlocks: 7, // 14/7=2 trials per mini-block (must be divisible)
+		
         blockCategories_nTrials: 14, // block 2
+		blockCategories_nMiniBlocks: 7, // 14/7=2 trials per mini-block (must be divisible)
+		
         blockFirstCombined_nTrials: 28, // block 3,6
+		blockFirstCombined_nMiniBlocks: 7, // combined blocks are generated in groups of 4 trials
+		
         blockSecondCombined_nTrials: 42, // block 4,7
+		blockSecondCombined_nMiniBlocks: 7,
+		
         blockSwitch_nTrials: 28,  // block 5, switch
+		blockSwitch_nMiniBlocks: 7,
 		
         category1 : {
             name : global.asianLabels, //Will appear in the data.
