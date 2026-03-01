@@ -1,6 +1,6 @@
 
 
-define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
+define(['pipAPI','./iat10.js'], function(APIConstructor, iatExtension){
     
     let API = new APIConstructor();
     let global = API.getGlobal();
