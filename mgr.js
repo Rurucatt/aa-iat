@@ -1,5 +1,5 @@
 define(['managerAPI',
-		'https://raw.githubusercontent.com/Rurucatt/aa-iat/refs/heads/main/iat10lib.js'], function(Manager){
+		'https://cdn.jsdelivr.net/gh/baranan/minno-tasks@0.7.3*/IAT/iat10.js'], function(Manager){
 	
 	//You can use the commented-out code to get parameters from the URL.
 	//const queryString = window.location.search;
