@@ -7,10 +7,10 @@ define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
       
     return iatExtension({
         blockAttributes_nTrials: 14, // trial number of block 1
-		blockAttributes_nMiniBlocks: 7, // 14/2=7 trials per mini-block (must be divisible)
+		blockAttributes_nMiniBlocks: 7, // 14/7=2 trials per mini-block (must be divisible)
 		
         blockCategories_nTrials: 14, // block 2
-		blockCategories_nMiniBlocks: 7, // 14/2=7 trials per mini-block (must be divisible)
+		blockCategories_nMiniBlocks: 7, // 14/7=2 trials per mini-block (must be divisible)
 		
         blockFirstCombined_nTrials: 28, // block 3,6
 		blockFirstCombined_nMiniBlocks: 7, // combined blocks are generated in groups of 4 trials
