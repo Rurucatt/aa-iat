@@ -877,7 +877,7 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
         function isBlockInList(list, blockNum)
 		{
 			return Array.isArray(list) && list.indexOf(blockNum) > -1;
-		} //之前报错 TypeError: _.contains is not a function
+		} //报错 TypeError: _.contains is not a function；用array.is array + indexof做判断
 		
 		//Count the number of blocks in this task
         var nBlocks = (globalObj.blockAttributes_nTrials<1 ? 0 : 1) + 
@@ -1021,9 +1021,11 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
     			rightTrial1 : rightAttTrial, leftTrial1 : leftAttTrial,
     			rightTrial2 : rightCatTrial, leftTrial2 : leftCatTrial,
     			//blockNum : iBlock, blockLayout : blockLayout}));
+				
 				blockNum : iBlock, blockLayout : blockLayout,
-    			startWithAttribute : _.contains(globalObj.attributeFirstInBlocks, iBlock)}));
+    			startWithAttribute : isBlockInList(globalObj.attributeFirstInBlocks, iBlock)}));
 				// 2026/3/1 改动，使得3467block都遵循该逻辑
+				
     		}
 			iBlock++;
 		}
@@ -1050,7 +1052,7 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
 				rightTrial2 : rightCatTrial, leftTrial2 : leftCatTrial,
 				//blockNum : iBlock, blockLayout : blockLayout}));
 				blockNum : iBlock, blockLayout : blockLayout,
-    			startWithAttribute : _.contains(globalObj.attributeFirstInBlocks, iBlock)}));
+    			startWithAttribute : isBlockInList(globalObj.attributeFirstInBlocks, iBlock)}));
 				// 2026/3/1 改动，使得3467block都遵循该逻辑
 			}
 		    iBlock++;
@@ -1120,7 +1122,7 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
     			rightTrial2 : rightCatTrial, leftTrial2 : leftCatTrial,
     			//blockNum : iBlock, blockLayout : blockLayout}));
 				blockNum : iBlock, blockLayout : blockLayout,
-    			startWithAttribute : _.contains(globalObj.attributeFirstInBlocks, iBlock)}));
+    			startWithAttribute : isBlockInList(globalObj.attributeFirstInBlocks, iBlock)}));
 				// 2026/3/1 改动，使得3467block都遵循该逻辑
     		}
 			iBlock++;
@@ -1153,7 +1155,7 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
 				rightTrial2 : rightCatTrial, leftTrial2 : leftCatTrial,
 				//blockNum : iBlock, blockLayout : blockLayout}));
 				blockNum : iBlock, blockLayout : blockLayout,
-    			startWithAttribute : _.contains(globalObj.attributeFirstInBlocks, iBlock)}));
+    			startWithAttribute : isBlockInList(globalObj.attributeFirstInBlocks, iBlock)}));
 				// 2026/3/1 改动，使得3467block都遵循该逻辑
 			}
 		}
