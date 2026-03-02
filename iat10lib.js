@@ -874,7 +874,12 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
 
 		var globalObj = piCurrent;
 
-        //Count the number of blocks in this task
+        function isBlockInList(list, blockNum)
+		{
+			return Array.isArray(list) && list.indexOf(blockNum) > -1;
+		} //之前报错 TypeError: _.contains is not a function
+		
+		//Count the number of blocks in this task
         var nBlocks = (globalObj.blockAttributes_nTrials<1 ? 0 : 1) + 
         (globalObj.blockCategories_nTrials<1 ? 0 : 1) + 
         (globalObj.blockFirstCombined_nTrials<1 ? 0 : 2) + 
