@@ -127,6 +127,9 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
 			blockSwitch_nTrials : 28,
 			blockSwitch_nMiniBlocks : 7,
 
+			//Combined blocks listed here will start with an attribute (word) trial instead of a category (image) trial.
+			attributeFirstInBlocks : [],
+			
 			//Should we randomize which attribute is on the right, and which on the left?
 			randomAttSide : false, // Accepts 'true' and 'false'. If false, then attribute2 on the right.
 
@@ -822,21 +825,40 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
 			var mixerData = [];
 			var iCat = 0;
 			var iAtt = 0;
+			var startWithAttribute = !!params.startWithAttribute; //2026/3/1改动
 			for (iTrial = 1; iTrial <= params.nTrialsInMini; iTrial+=2)
 			{
-				mixerData.push(
-				{
+				//mixerData.push(
+				//{
+				var catStim = {
 					inherit : (cats[iCat] == 1) ? params.leftTrial2 : params.rightTrial2,
 					data : {condition : params.currentCond, block : params.blockNum},
-						layout : params.blockLayout
-				});
-				iCat++;
-				mixerData.push(
-				{
+				//		layout : params.blockLayout
+				//});
+				//iCat++;
+				//mixerData.push(
+				//{
+					layout : params.blockLayout
+				};
+				var attStim = {
 					inherit : (atts[iAtt] == 1) ? params.leftTrial1 : params.rightTrial1,
 					data : {condition : params.currentCond, block : params.blockNum},
-						layout : params.blockLayout
-				});
+				//		layout : params.blockLayout
+				//});
+					layout : params.blockLayout
+				};
+
+				if (startWithAttribute)
+				{
+					mixerData.push(attStim);
+					mixerData.push(catStim);
+				}
+				else
+				{
+					mixerData.push(catStim);
+					mixerData.push(attStim);
+				}
+				iCat++; 	//2026/3/1改动 设置attribute (word)和category（image）哪个先触发的逻辑
 				iAtt++;
 			}
 
@@ -993,7 +1015,10 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
     			nTrialsInMini : nTrialsInMini, currentCond : blockCondition,
     			rightTrial1 : rightAttTrial, leftTrial1 : leftAttTrial,
     			rightTrial2 : rightCatTrial, leftTrial2 : leftCatTrial,
-    			blockNum : iBlock, blockLayout : blockLayout}));
+    			//blockNum : iBlock, blockLayout : blockLayout}));
+				blockNum : iBlock, blockLayout : blockLayout,
+    			startWithAttribute : _.contains(globalObj.attributeFirstInBlocks, iBlock)}));
+				// 2026/3/1 改动，使得3467block都遵循该逻辑
     		}
 			iBlock++;
 		}
@@ -1018,7 +1043,10 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
 				nTrialsInMini : nTrialsInMini, currentCond : blockCondition,
 				rightTrial1 : rightAttTrial, leftTrial1 : leftAttTrial,
 				rightTrial2 : rightCatTrial, leftTrial2 : leftCatTrial,
-				blockNum : iBlock, blockLayout : blockLayout}));
+				//blockNum : iBlock, blockLayout : blockLayout}));
+				blockNum : iBlock, blockLayout : blockLayout,
+    			startWithAttribute : _.contains(globalObj.attributeFirstInBlocks, iBlock)}));
+				// 2026/3/1 改动，使得3467block都遵循该逻辑
 			}
 		    iBlock++;
 		}
@@ -1085,7 +1113,10 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
     			nTrialsInMini : nTrialsInMini, currentCond : blockCondition,
     			rightTrial1 : rightAttTrial, leftTrial1 : leftAttTrial,
     			rightTrial2 : rightCatTrial, leftTrial2 : leftCatTrial,
-    			blockNum : iBlock, blockLayout : blockLayout}));
+    			//blockNum : iBlock, blockLayout : blockLayout}));
+				blockNum : iBlock, blockLayout : blockLayout,
+    			startWithAttribute : _.contains(globalObj.attributeFirstInBlocks, iBlock)}));
+				// 2026/3/1 改动，使得3467block都遵循该逻辑
     		}
 			iBlock++;
 		}
@@ -1115,7 +1146,10 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
 				nTrialsInMini : nTrialsInMini, currentCond : blockCondition,
 				rightTrial1 : rightAttTrial, leftTrial1 : leftAttTrial,
 				rightTrial2 : rightCatTrial, leftTrial2 : leftCatTrial,
-				blockNum : iBlock, blockLayout : blockLayout}));
+				//blockNum : iBlock, blockLayout : blockLayout}));
+				blockNum : iBlock, blockLayout : blockLayout,
+    			startWithAttribute : _.contains(globalObj.attributeFirstInBlocks, iBlock)}));
+				// 2026/3/1 改动，使得3467block都遵循该逻辑
 			}
 		}
 		//////////////////////////////
