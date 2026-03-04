@@ -21,6 +21,8 @@ define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
         blockSwitch_nTrials: 28,  // block 5, switch
 		blockSwitch_nMiniBlocks: 7,
 
+		randomAttSide: true, // Randomize whether Bad/Good Student starts on the left or right.
+
 		//attributeFirstInBlocks: [4, 6], // make the first stimulus a word in blocks 4 and 6
 		
         category1 : {
