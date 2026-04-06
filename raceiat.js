@@ -33,14 +33,14 @@ define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
                 height : 4 //Used to position the "Or" in the combined block.
             }, 
             stimulusMedia : [ //Stimuli content as PIP's media objects
-                {image: 'am00001.png'},
-                {image: 'am00002.png'},
-                {image: 'am00003.png'},
-                {image: 'am00004.png'},
-                {image: 'af00001.png'},
-                {image: 'af00002.png'},                 
-                {image: 'af00003.png'},
-                {image: 'af00004.png'}
+                {image: 'FAS04.jpg'},
+                {image: 'FAS09.jpg'},
+                {image: 'FSA01.jpg'},
+                {image: 'FSA07.jpg'},
+                {image: 'MAS01.jpg'},
+                {image: 'MAS02.jpg'},                 
+                {image: 'MAS03.jpg'},
+                {image: 'MAS04.jpg'}
             ],
             //Stimulus css (style)
             stimulusCss : {color:'#31940F','font-size':'2.3em'}
@@ -53,14 +53,14 @@ define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
                 height : 4 //Used to position the "Or" in the combined block.
             }, 
             stimulusMedia : [ //Stimuli content as PIP's media objects
-                {image: 'wm00001.png'},
-                {image: 'wm00002.png'},
-                {image: 'wm00003.png'},
-                {image: 'wm00004.png'},
-                {image: 'wf00001.png'},
-                {image: 'wf00002.png'},
-                {image: 'wf00003.png'},
-                {image: 'wf00004.png'},
+                {image: 'FEA13.jpg'},
+                {image: 'FEA23.jpg'},
+                {image: 'FEA25.jpg'},
+                {image: 'FEA36.jpg'},
+                {image: 'MEA06b.jpg'},
+                {image: 'MEA14.jpg'},
+                {image: 'MEA24.jpg'},
+                {image: 'MEA34.jpg'},
             ],
             //Stimulus css (style)
             stimulusCss : {color:'#31940F','font-size':'2.3em'}
