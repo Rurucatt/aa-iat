@@ -34,13 +34,11 @@ define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
             }, 
             stimulusMedia : [ //Stimuli content as PIP's media objects
                 {image: 'FAS04.jpg'},
-                {image: 'FAS09.jpg'},
-                {image: 'FSA01.jpg'},
-                {image: 'FSA07.jpg'},
-                {image: 'MAS01.jpg'},
-                {image: 'MAS02.jpg'},                 
+                {image: 'FAS05.jpg'},
+                {image: 'FAS07.jpg'},
+                {image: 'MAS01.jpg'},                
                 {image: 'MAS03.jpg'},
-                {image: 'MAS04.jpg'}
+                {image: 'MAS06.jpg'}
             ],
             //Stimulus css (style)
             stimulusCss : {color:'#31940F','font-size':'2.3em'}
@@ -53,14 +51,12 @@ define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
                 height : 4 //Used to position the "Or" in the combined block.
             }, 
             stimulusMedia : [ //Stimuli content as PIP's media objects
-                {image: 'FEA13.jpg'},
+                {image: 'FEA15.jpg'},
                 {image: 'FEA23.jpg'},
-                {image: 'FEA25.jpg'},
                 {image: 'FEA36.jpg'},
                 {image: 'MEA06b.jpg'},
+                {image: 'MEA11.jpg'},
                 {image: 'MEA14.jpg'},
-                {image: 'MEA24.jpg'},
-                {image: 'MEA34.jpg'},
             ],
             //Stimulus css (style)
             stimulusCss : {color:'#31940F','font-size':'2.3em'}
