@@ -6,20 +6,20 @@ define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
     let global = API.getGlobal();
       
     return iatExtension({
-        blockAttributes_nTrials: 14, // trial number of block 1
-		blockAttributes_nMiniBlocks: 7, // 14/7=2 trials per mini-block (must be divisible)
+        blockAttributes_nTrials: 12, // trial number of block 1
+		blockAttributes_nMiniBlocks: 6, // 14/7=2 trials per mini-block (must be divisible)
 		
-        blockCategories_nTrials: 14, // block 2
-		blockCategories_nMiniBlocks: 7, // 14/7=2 trials per mini-block (must be divisible)
+        blockCategories_nTrials: 12, // block 2
+		blockCategories_nMiniBlocks: 6, // 14/7=2 trials per mini-block (must be divisible)
 		
-        blockFirstCombined_nTrials: 28, // block 3,6
-		blockFirstCombined_nMiniBlocks: 7, // combined blocks are generated in groups of 4 trials
+        blockFirstCombined_nTrials: 24, // block 3,6
+		blockFirstCombined_nMiniBlocks: 6, // combined blocks are generated in groups of 4 trials
 		
-        blockSecondCombined_nTrials: 42, // block 4,7
-		blockSecondCombined_nMiniBlocks: 7,
+        blockSecondCombined_nTrials: 48, // block 4,7
+		blockSecondCombined_nMiniBlocks: 6,
 		
-        blockSwitch_nTrials: 28,  // block 5, switch
-		blockSwitch_nMiniBlocks: 7,
+        blockSwitch_nTrials: 24,  // block 5, switch
+		blockSwitch_nMiniBlocks: 6,
 
 		randomAttSide: true, // Randomize whether Bad/Good Student starts on the left or right.
 
