@@ -41,14 +41,10 @@ define(['managerAPI',
         //Select randomly what attribute words to see. 
         //Based on Axt, Feng, & Bar-Anan (2021).
         posWords : API.shuffle([
-            'Obedient', 'Successful', 'Hard-working', 'Quiet',
-            'Intelligent', 'Studious', 'Diligent', 'Focused', 
-            'Smart'
+            'Successful', 'Hard-working', 'Intelligent', 'Studious', 'Focused', 'Smart'
         ]), 
         negWords : API.shuffle([
-            'Rebellious', 'Disruptive', 'Lazy', 'Loud', 
-            'Distracted', 'Careless', 'Irresponsible', 'Disengaged', 
-            'Slacker'
+            'Rebellious', 'Lazy', 'Distracted', 'Irresponsible', 'Disengaged', 'Slacker'
         ])
     });
 
