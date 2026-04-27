@@ -75,9 +75,6 @@ define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
                 {word: global.negWords[3]},
                 {word: global.negWords[4]},
                 {word: global.negWords[5]},
-                {word: global.negWords[6]},
-                {word: global.negWords[7]},
-                {word: global.negWords[8]}
             ],
             //Stimulus css
             stimulusCss : {color:'#0000FF','font-size':'2.3em'}
@@ -96,9 +93,6 @@ define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
                 {word: global.posWords[3]},
                 {word: global.posWords[4]},
                 {word: global.posWords[5]},
-                {word: global.posWords[6]},
-                {word: global.posWords[7]},
-                {word: global.posWords[8]}
             ],
             //Stimulus css
             stimulusCss : {color:'#0000FF','font-size':'2.3em'}
