@@ -2,7 +2,7 @@ define(['questAPI'], function(Quest){
     var API = new Quest();
 
     // Quest renders the three free-text "Other" answers as separate questions.
-    // Move only their existing input elements into the corresponding last option;
+    // Move only their existing input elements into the matching option label;
     // Quest still owns the inputs and their values.
     function placeOtherInputsInline(){
         if (typeof document === 'undefined') return;
@@ -12,47 +12,132 @@ define(['questAPI'], function(Quest){
             style.id = 'inline-other-style';
             style.textContent = [
                 '.inline-other-answer { display: inline-flex; align-items: center; gap: 8px; margin-left: 4px; vertical-align: middle; }',
-                '.inline-other-answer input { width: 260px; max-width: 100%; padding: 3px 4px; color: #333; background: transparent; border: 0; border-bottom: 1px solid #777; border-radius: 0; box-shadow: none; }',
-                '.inline-other-answer input:focus { border-color: #337ab7; outline: 0; box-shadow: 0 1px 0 #337ab7; }',
-                '@media (max-width: 600px) { .inline-other-answer { display: flex; margin: 8px 0 0; } .inline-other-answer input { width: 100%; } }'
+                '.inline-other-answer input, .inline-other-answer textarea { width: 260px; max-width: 100%; padding: 3px 4px; color: #333; background: transparent; border: 0; border-bottom: 1px solid #777; border-radius: 0; box-shadow: none; }',
+                '.inline-other-answer input:focus, .inline-other-answer textarea:focus { border-color: #337ab7; outline: 0; box-shadow: 0 1px 0 #337ab7; }',
+                '.inline-other-hidden-question { display: none !important; }',
+                '@media (max-width: 600px) { .inline-other-answer { display: flex; margin: 8px 0 0; } .inline-other-answer input, .inline-other-answer textarea { width: 100%; } }'
             ].join('\n');
             document.head.appendChild(style);
         }
 
-        function moveInput(input, expectedStem){
-            var inputQuestion = input.closest('li');
-            if (!inputQuestion || inputQuestion.getAttribute('data-inline-other')) return;
-            if (inputQuestion.textContent.indexOf(expectedStem) === -1) return;
+        var items = [
+            {
+                inputName: 'study_state_other',
+                inputStem: 'Please enter the state in which you study.',
+                optionText: 'I study in a state that is not listed above (specify)'
+            },
+            {
+                inputName: 'gender_identity_other',
+                inputStem: 'Please enter your gender identity.',
+                optionText: 'Gender Identity not listed (specify)'
+            },
+            {
+                inputName: 'race_other',
+                inputStem: 'Please enter your race.',
+                optionText: 'Other (specify)'
+            }
+        ];
 
-            // Each free-text question immediately follows the choice it belongs to.
-            var optionQuestion = inputQuestion.previousElementSibling;
-            if (!optionQuestion) return;
-            var options = optionQuestion.querySelectorAll('.btn');
-            var option = options[options.length - 1];
+        function cleanText(element){
+            return (element && element.textContent || '').replace(/\s+/g, ' ').trim();
+        }
+
+        function hasText(element, text){
+            return cleanText(element).indexOf(text) !== -1;
+        }
+
+        function visible(element){
+            return !!(element && (element.offsetWidth || element.offsetHeight || element.getClientRects().length));
+        }
+
+        function containsAnyOptionText(element){
+            for (var i = 0; i < items.length; i++){
+                if (hasText(element, items[i].optionText)) return true;
+            }
+            return false;
+        }
+
+        function controlCount(element){
+            return element.querySelectorAll('input:not([type="hidden"]), textarea, select, button, .btn').length;
+        }
+
+        function findOption(item){
+            var candidates = document.querySelectorAll('[piq-page] .btn, [piq-page] button, [piq-page] label, [piq-page] [role="button"]');
+            var match = null;
+            Array.prototype.forEach.call(candidates, function(candidate){
+                if (visible(candidate) && hasText(candidate, item.optionText)) match = candidate;
+            });
+            return match;
+        }
+
+        function findSafeQuestionBlock(input, item){
+            var current = input.parentElement;
+            while (current && current !== document.body && !current.hasAttribute('piq-page')){
+                if (hasText(current, item.inputStem) && !containsAnyOptionText(current) && controlCount(current) <= 3){
+                    return current;
+                }
+                current = current.parentElement;
+            }
+            return null;
+        }
+
+        function fieldMatchesName(field, inputName){
+            var attrs = [
+                field.getAttribute('name'),
+                field.getAttribute('id'),
+                field.getAttribute('ng-model'),
+                field.getAttribute('data-ng-model')
+            ].join(' ');
+            return attrs.indexOf(inputName) !== -1;
+        }
+
+        function findInput(item){
+            var fields = document.querySelectorAll('[piq-page] input:not([type="hidden"]), [piq-page] textarea');
+            var fallback = null;
+
+            for (var i = 0; i < fields.length; i++){
+                if (fieldMatchesName(fields[i], item.inputName)) return fields[i];
+                if (!fallback && findSafeQuestionBlock(fields[i], item)) fallback = fields[i];
+            }
+
+            return fallback;
+        }
+
+        function hideExactStemLabel(item){
+            var candidates = document.querySelectorAll('[piq-page] label, [piq-page] p, [piq-page] span, [piq-page] div');
+            Array.prototype.forEach.call(candidates, function(candidate){
+                if (cleanText(candidate) === item.inputStem && controlCount(candidate) === 0){
+                    candidate.classList.add('inline-other-hidden-question');
+                }
+            });
+        }
+
+        function moveInput(item){
+            var input = findInput(item);
+            if (!input || input.getAttribute('data-inline-other')) return;
+
+            var option = findOption(item);
             if (!option) return;
+
+            var inputQuestion = findSafeQuestionBlock(input, item);
 
             var inline = document.createElement('span');
             inline.className = 'inline-other-answer';
             inline.appendChild(document.createTextNode(':'));
             inline.appendChild(input);
             option.appendChild(inline);
-            inputQuestion.style.display = 'none';
-            inputQuestion.setAttribute('data-inline-other', 'true');
+            input.setAttribute('data-inline-other', 'true');
+
+            if (inputQuestion) inputQuestion.classList.add('inline-other-hidden-question');
+            hideExactStemLabel(item);
 
             // Focusing or typing in the field must not toggle the owning option.
             input.addEventListener('click', function(event){ event.stopPropagation(); });
+            input.addEventListener('keydown', function(event){ event.stopPropagation(); });
         }
 
         function enhance(){
-            var stems = [
-                'Please enter the state in which you study.',
-                'Please enter your gender identity.',
-                'Please enter your race.'
-            ];
-            var inputs = document.querySelectorAll('[piq-page] input:not([type="hidden"]), [piq-page] textarea');
-            Array.prototype.forEach.call(inputs, function(input){
-                stems.forEach(function(stem){ moveInput(input, stem); });
-            });
+            items.forEach(moveInput);
         }
 
         var observer = new MutationObserver(enhance);
