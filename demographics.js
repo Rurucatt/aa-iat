@@ -16,6 +16,15 @@ define(['questAPI'], function(Quest){
                 '.inline-other-answer input:focus, .inline-other-answer textarea:focus { border-color: #337ab7; outline: 0; box-shadow: 0 1px 0 #337ab7; }',
                 '.inline-other-option, .inline-other-option.active, .inline-other-option.active:hover, .inline-other-option.active:focus, .inline-other-option:active, .inline-other-option:active:hover, .inline-other-option:active:focus { color: #333 !important; background: #fff !important; border-color: #ccc !important; box-shadow: none !important; text-shadow: none !important; }',
                 '.inline-other-option.active .inline-other-answer input, .inline-other-option:active .inline-other-answer input, .inline-other-option.active .inline-other-answer textarea, .inline-other-option:active .inline-other-answer textarea { color: #333 !important; background: transparent !important; border-bottom-color: #337ab7 !important; }',
+                '.demographics-choice-option, .demographics-choice-option:hover, .demographics-choice-option:focus, .demographics-choice-option:active, .demographics-choice-option.active, .demographics-choice-option.btn-primary, .demographics-choice-option.btn-info { display: block; width: 100%; margin: 6px 0; padding: 6px 10px 6px 34px; color: #222 !important; background: #fff !important; border: 0 !important; box-shadow: none !important; text-align: left; white-space: normal; position: relative; }',
+                '.demographics-choice-option::before { content: ""; position: absolute; left: 8px; top: 50%; width: 16px; height: 16px; margin-top: -8px; border: 1.5px solid #777; background: #fff; }',
+                '.demographics-choice-option.radio-choice-option::before { border-radius: 50%; }',
+                '.demographics-choice-option.multi-choice-option::before { border-radius: 3px; }',
+                '.demographics-choice-option.active::after, .demographics-choice-option.btn-primary::after, .demographics-choice-option.btn-info::after, .demographics-choice-option[aria-pressed="true"]::after, .demographics-choice-option[aria-checked="true"]::after { content: ""; position: absolute; left: 12px; top: 50%; width: 8px; height: 8px; margin-top: -4px; background: #337ab7; }',
+                '.demographics-choice-option.radio-choice-option.active::after, .demographics-choice-option.radio-choice-option.btn-primary::after, .demographics-choice-option.radio-choice-option.btn-info::after, .demographics-choice-option.radio-choice-option[aria-pressed="true"]::after, .demographics-choice-option.radio-choice-option[aria-checked="true"]::after { border-radius: 50%; }',
+                '.demographics-choice-option.multi-choice-option.active::after, .demographics-choice-option.multi-choice-option.btn-primary::after, .demographics-choice-option.multi-choice-option.btn-info::after, .demographics-choice-option.multi-choice-option[aria-pressed="true"]::after, .demographics-choice-option.multi-choice-option[aria-checked="true"]::after { border-radius: 2px; }',
+                '.demographics-question-stem { font-weight: 700 !important; }',
+                '.demographics-question-stem::before, .demographics-question-stem::after { content: none !important; }',
                 '.inline-other-hidden-question { display: none !important; }',
                 '@media (max-width: 600px) { .inline-other-answer { display: flex; margin: 8px 0 0; } .inline-other-answer input, .inline-other-answer textarea { width: 100%; } }'
             ].join('\n');
@@ -40,6 +49,33 @@ define(['questAPI'], function(Quest){
             }
         ];
 
+        var questionStems = [
+            'Are you currently a student studying education?',
+            'Are you an undergraduate or graduate student?',
+            'Please select your year of study.',
+            'Please select the state in which you study.',
+            'Please enter the state in which you study.',
+            'Please enter your date of birth.',
+            'What is your age? (years)',
+            'What is your sex assigned at birth?',
+            'What is your gender?',
+            'Please enter your gender identity.',
+            'Please select your race. You may select more than one option.',
+            'Please enter your race.',
+            'Please select your ethnicity.',
+            'Are you able to read and understand English?',
+            'Are you able to complete this study on a personal device with a keyboard?'
+        ];
+
+        var raceOptionTexts = [
+            'American Indian or Alaska Native',
+            'Asian',
+            'Black or African American',
+            'Native Hawaiian or Other Pacific Islander',
+            'White',
+            'Other (specify)'
+        ];
+
         function cleanText(element){
             return (element && element.textContent || '').replace(/\s+/g, ' ').trim();
         }
@@ -48,8 +84,30 @@ define(['questAPI'], function(Quest){
             return cleanText(element).indexOf(text) !== -1;
         }
 
+        function textIsOneOf(text, values){
+            for (var i = 0; i < values.length; i++){
+                if (text === values[i]) return true;
+            }
+            return false;
+        }
+
+        function textStartsWithOneOf(text, values){
+            for (var i = 0; i < values.length; i++){
+                if (text.indexOf(values[i]) === 0) return true;
+            }
+            return false;
+        }
+
         function visible(element){
             return !!(element && (element.offsetWidth || element.offsetHeight || element.getClientRects().length));
+        }
+
+        function selected(option){
+            return option.classList.contains('active') ||
+                option.classList.contains('btn-primary') ||
+                option.classList.contains('btn-info') ||
+                option.getAttribute('aria-pressed') === 'true' ||
+                option.getAttribute('aria-checked') === 'true';
         }
 
         function containsAnyOptionText(element){
@@ -70,6 +128,10 @@ define(['questAPI'], function(Quest){
                 if (visible(candidate) && hasText(candidate, item.optionText)) match = candidate;
             });
             return match;
+        }
+
+        function isMultiSelectOption(option){
+            return textStartsWithOneOf(cleanText(option), raceOptionTexts);
         }
 
         function findSafeQuestionBlock(input, item){
@@ -134,16 +196,95 @@ define(['questAPI'], function(Quest){
             if (inputQuestion) inputQuestion.classList.add('inline-other-hidden-question');
             hideExactStemLabel(item);
 
-            // Focusing or typing in the field must not toggle the owning option.
-            input.addEventListener('click', function(event){ event.stopPropagation(); });
-            input.addEventListener('keydown', function(event){ event.stopPropagation(); });
-            option.addEventListener('click', function(){
+            var optionIsMulti = isMultiSelectOption(option);
+            var inlineOptionSelected = selected(option);
+
+            function clearInput(){
+                if (!input.value) return;
+                input.value = '';
+                input.dispatchEvent(new Event('input', {bubbles: true}));
+                input.dispatchEvent(new Event('change', {bubbles: true}));
+            }
+
+            function clearIfDeselected(){
+                setTimeout(function(){
+                    inlineOptionSelected = selected(option);
+                    if (!inlineOptionSelected) clearInput();
+                }, 0);
+            }
+
+            function selectInlineOption(){
+                if (optionIsMulti){
+                    if (!inlineOptionSelected){
+                        option.click();
+                        inlineOptionSelected = true;
+                    }
+                } else if (!selected(option)) {
+                    option.click();
+                    inlineOptionSelected = true;
+                }
+
                 setTimeout(function(){ input.focus(); }, 0);
+            }
+
+            // Focusing or typing in the field must not repeatedly toggle the owning option.
+            input.addEventListener('mousedown', function(event){
+                event.stopPropagation();
+                selectInlineOption();
             });
+            input.addEventListener('touchstart', function(event){
+                event.stopPropagation();
+                selectInlineOption();
+            });
+            input.addEventListener('focus', selectInlineOption);
+            input.addEventListener('click', function(event){
+                event.stopPropagation();
+                selectInlineOption();
+            });
+            input.addEventListener('keydown', function(event){ event.stopPropagation(); });
+            option.addEventListener('click', function(event){
+                if (event.target.closest('.inline-other-answer input, .inline-other-answer textarea')) return;
+
+                if (optionIsMulti) inlineOptionSelected = !inlineOptionSelected;
+                else inlineOptionSelected = true;
+
+                if (!inlineOptionSelected) clearInput();
+                if (inlineOptionSelected) setTimeout(function(){ input.focus(); }, 0);
+            });
+            document.addEventListener('click', clearIfDeselected, false);
         }
 
         function enhance(){
             items.forEach(moveInput);
+            markQuestionStems();
+            markChoiceOptions();
+        }
+
+        function markQuestionStems(){
+            var candidates = document.querySelectorAll('[piq-page] label, [piq-page] p, [piq-page] span, [piq-page] div');
+            Array.prototype.forEach.call(candidates, function(candidate){
+                if (textIsOneOf(cleanText(candidate), questionStems) && controlCount(candidate) === 0){
+                    candidate.classList.add('demographics-question-stem');
+                    candidate.classList.remove('demographics-choice-option', 'radio-choice-option', 'multi-choice-option');
+                }
+            });
+        }
+
+        function markChoiceOptions(){
+            var candidates = document.querySelectorAll('[piq-page] .btn, [piq-page] button, [piq-page] label, [piq-page] [role="button"]');
+            Array.prototype.forEach.call(candidates, function(option){
+                var action = option.getAttribute('ng-click') || option.getAttribute('data-ng-click') || '';
+                if (action.indexOf('submit') !== -1 || !visible(option)) return;
+                if (textIsOneOf(cleanText(option), questionStems)){
+                    option.classList.remove('demographics-choice-option', 'radio-choice-option', 'multi-choice-option');
+                    option.classList.add('demographics-question-stem');
+                    return;
+                }
+
+                option.classList.add('demographics-choice-option');
+                if (isMultiSelectOption(option)) option.classList.add('multi-choice-option');
+                else option.classList.add('radio-choice-option');
+            });
         }
 
         var observer = new MutationObserver(enhance);
