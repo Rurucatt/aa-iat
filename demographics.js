@@ -26,6 +26,7 @@ define(['questAPI'], function(Quest){
                 '.demographics-question-stem { font-weight: 700 !important; }',
                 '.demographics-question-stem::before, .demographics-question-stem::after { content: none !important; }',
                 '.demographics-question-stem.demographics-required-stem::before { content: "*" !important; display: inline-block; margin-right: 6px; color: #c9302c; font-weight: 700; }',
+                '.demographics-scroll-target { outline: 2px solid rgba(201, 48, 44, 0.35); outline-offset: 4px; }',
                 '.inline-other-hidden-question { display: none !important; }',
                 '@media (max-width: 600px) { .inline-other-answer { display: flex; margin: 8px 0 0; } .inline-other-answer input, .inline-other-answer textarea { width: 100%; } }'
             ].join('\n');
@@ -85,6 +86,10 @@ define(['questAPI'], function(Quest){
             'If you are interested in being entered into the raffle to win a $20 Amazon gift card, please enter your email (Please note that you must be eligible for, and complete the study to be entered into the raffle to win the gift card):'
         ];
 
+        var requiredQuestionStems = questionStems.filter(function(stem){
+            return !textIsOneOf(stem, optionalQuestionStems);
+        });
+
         function cleanText(element){
             return (element && element.textContent || '').replace(/\s+/g, ' ').trim();
         }
@@ -141,6 +146,104 @@ define(['questAPI'], function(Quest){
 
         function isMultiSelectOption(option){
             return textStartsWithOneOf(cleanText(option), raceOptionTexts);
+        }
+
+        function scrollToElement(element){
+            if (!element) return;
+
+            element.scrollIntoView({behavior: 'smooth', block: 'center'});
+            if (element.classList) element.classList.add('demographics-scroll-target');
+            setTimeout(function(){
+                if (element.classList) element.classList.remove('demographics-scroll-target');
+            }, 1200);
+        }
+
+        function findQuestionContainer(element){
+            var selectors = ['li', '[pi-question]', '[piq-question]', '.form-group'];
+            for (var i = 0; i < selectors.length; i++){
+                var container = element.closest(selectors[i]);
+                if (container && container.closest('[piq-page]')) return container;
+            }
+
+            var current = element.parentElement;
+            while (current && current !== document.body && !current.hasAttribute('piq-page')){
+                if (current.querySelector('.demographics-choice-option, input:not([type="hidden"]), textarea, select')){
+                    return current;
+                }
+                current = current.parentElement;
+            }
+
+            return element;
+        }
+
+        function findStemElement(stem){
+            var candidates = document.querySelectorAll('[piq-page] .demographics-question-stem, [piq-page] label, [piq-page] p, [piq-page] span, [piq-page] div');
+            for (var i = 0; i < candidates.length; i++){
+                if (visible(candidates[i]) && cleanText(candidates[i]) === stem) return candidates[i];
+            }
+            return null;
+        }
+
+        function questionAnswered(container){
+            if (!container) return true;
+
+            var choiceOptions = container.querySelectorAll('.demographics-choice-option');
+            for (var i = 0; i < choiceOptions.length; i++){
+                if (selected(choiceOptions[i])) return true;
+            }
+
+            var fields = container.querySelectorAll('input:not([type="hidden"]), textarea, select');
+            for (var j = 0; j < fields.length; j++){
+                if ((fields[j].value || '').trim() !== '') return true;
+            }
+
+            return choiceOptions.length === 0 && fields.length === 0;
+        }
+
+        function firstManualIncompleteQuestion(){
+            for (var i = 0; i < requiredQuestionStems.length; i++){
+                var stemElement = findStemElement(requiredQuestionStems[i]);
+                if (!stemElement) continue;
+
+                var container = findQuestionContainer(stemElement);
+                if (!questionAnswered(container)) return stemElement;
+            }
+
+            return null;
+        }
+
+        function firstValidationError(){
+            var candidates = document.querySelectorAll('[piq-page] .has-error, [piq-page] .text-danger, [piq-page] .alert-danger, [piq-page] .error, [piq-page] [class*="error"]');
+            for (var i = 0; i < candidates.length; i++){
+                var text = cleanText(candidates[i]).toLowerCase();
+                if (visible(candidates[i]) && (text.indexOf('answer') !== -1 || text.indexOf('select') !== -1 || text.indexOf('enter') !== -1 || text.indexOf('required') !== -1)){
+                    return findQuestionContainer(candidates[i]);
+                }
+            }
+
+            return null;
+        }
+
+        function scrollToFirstIncompleteQuestion(){
+            var target = firstValidationError() || firstManualIncompleteQuestion();
+            scrollToElement(target);
+        }
+
+        function watchSubmitForIncompleteQuestions(){
+            if (document.documentElement.getAttribute('data-demographics-submit-scroll')) return;
+            document.documentElement.setAttribute('data-demographics-submit-scroll', 'true');
+
+            document.addEventListener('click', function(event){
+                var submit = event.target.closest('[ng-click], [data-ng-click], button, .btn');
+                if (!submit || !submit.closest('[piq-page]')) return;
+
+                var action = submit.getAttribute('ng-click') || submit.getAttribute('data-ng-click') || '';
+                var text = cleanText(submit).toLowerCase();
+                if (action.indexOf('submit') === -1 && text !== 'submit') return;
+
+                setTimeout(scrollToFirstIncompleteQuestion, 100);
+                setTimeout(scrollToFirstIncompleteQuestion, 300);
+            }, true);
         }
 
         function findSafeQuestionBlock(input, item){
@@ -267,6 +370,7 @@ define(['questAPI'], function(Quest){
             items.forEach(moveInput);
             markQuestionStems();
             markChoiceOptions();
+            watchSubmitForIncompleteQuestions();
         }
 
         function markQuestionStems(){
