@@ -70,9 +70,9 @@ define(['managerAPI',
             header: 'Implicit Association Test'
         }],
 
-        explicits: [{
+        demographics: [{
             type: 'quest',
-            name: 'explicits',
+            name: 'demographics',
             scriptUrl: 'demographics.js'
         }],
 
@@ -144,20 +144,15 @@ define(['managerAPI',
         },
         
         
-        {inherit: 'intro'},
+        // Intro page is temporarily disabled.
+        // {inherit: 'intro'},
+        {inherit: 'demographics'},
         {
-            //mixer:'random',
-            //data:[
-                //{inherit: 'explicits'},
-
-                // force the instructions to preceed the iat
-                //{
-                    mixer: 'wrapper',
-                    data: [
-                        {inherit: 'raceiat_instructions'},
-                        {inherit: 'raceiat'}
-                    //]
-                //}
+            // Force the instructions to precede the IAT.
+            mixer: 'wrapper',
+            data: [
+                {inherit: 'raceiat_instructions'},
+                {inherit: 'raceiat'}
             ]
         },
 
