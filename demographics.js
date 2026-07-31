@@ -14,6 +14,8 @@ define(['questAPI'], function(Quest){
                 '.inline-other-answer { display: inline-flex; align-items: center; gap: 8px; margin-left: 4px; vertical-align: middle; }',
                 '.inline-other-answer input, .inline-other-answer textarea { width: 260px; max-width: 100%; padding: 3px 4px; color: #333; background: transparent; border: 0; border-bottom: 1px solid #777; border-radius: 0; box-shadow: none; }',
                 '.inline-other-answer input:focus, .inline-other-answer textarea:focus { border-color: #337ab7; outline: 0; box-shadow: 0 1px 0 #337ab7; }',
+                '.inline-other-option, .inline-other-option.active, .inline-other-option.active:hover, .inline-other-option.active:focus, .inline-other-option:active, .inline-other-option:active:hover, .inline-other-option:active:focus { color: #333 !important; background: #fff !important; border-color: #ccc !important; box-shadow: none !important; text-shadow: none !important; }',
+                '.inline-other-option.active .inline-other-answer input, .inline-other-option:active .inline-other-answer input, .inline-other-option.active .inline-other-answer textarea, .inline-other-option:active .inline-other-answer textarea { color: #333 !important; background: transparent !important; border-bottom-color: #337ab7 !important; }',
                 '.inline-other-hidden-question { display: none !important; }',
                 '@media (max-width: 600px) { .inline-other-answer { display: flex; margin: 8px 0 0; } .inline-other-answer input, .inline-other-answer textarea { width: 100%; } }'
             ].join('\n');
@@ -126,6 +128,7 @@ define(['questAPI'], function(Quest){
             inline.appendChild(document.createTextNode(':'));
             inline.appendChild(input);
             option.appendChild(inline);
+            option.classList.add('inline-other-option');
             input.setAttribute('data-inline-other', 'true');
 
             if (inputQuestion) inputQuestion.classList.add('inline-other-hidden-question');
@@ -134,6 +137,9 @@ define(['questAPI'], function(Quest){
             // Focusing or typing in the field must not toggle the owning option.
             input.addEventListener('click', function(event){ event.stopPropagation(); });
             input.addEventListener('keydown', function(event){ event.stopPropagation(); });
+            option.addEventListener('click', function(){
+                setTimeout(function(){ input.focus(); }, 0);
+            });
         }
 
         function enhance(){
