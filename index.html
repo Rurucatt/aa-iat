@@ -68,7 +68,7 @@
             <div class="panel panel-info">
                 <div class="panel-heading"><h1 class="panel-title">Thank You</h1></div>
                 <div class="panel-body">
-                    <p>Thank you for your time and interest in this study. You may now close this browser window.</p>
+                    <p id="exit-page-message">Thank you for your time and interest in this study. You may now close this browser window.</p>
                 </div>
             </div>
         </main>
@@ -77,15 +77,31 @@
             (function () {
                 var responseKey = 'screening_blurb_response';
                 var consentResponseKey = 'consent_response';
+                var demographicsScreeningKey = 'demographics_screening_response';
                 var form = document.getElementById('study-blurb-form');
                 var blurb = document.getElementById('study-blurb');
                 var exitPage = document.getElementById('exit-page');
+                var exitPageMessage = document.getElementById('exit-page-message');
+                var defaultExitMessage = 'Thank you for your time and interest in this study. You may now close this browser window.';
+                var screeningExitMessage = 'Thank you so much for taking part in our study! Unfortunately, you do not meet criteria for the study, but we thank you for your interest and your time.';
 
-                function showExitPage() {
+                function showExitPage(message) {
                     blurb.hidden = true;
+                    if (exitPageMessage) exitPageMessage.textContent = message || defaultExitMessage;
                     exitPage.hidden = false;
                     document.title = 'Thank You';
                 }
+
+                window.showStudyExitPage = function (message) {
+                    var container = document.querySelector('.container');
+                    if (container) container.style.display = 'none';
+                    showExitPage(message);
+                };
+
+                window.showDemographicsScreenOutPage = function () {
+                    sessionStorage.setItem(demographicsScreeningKey, 'ineligible');
+                    window.showStudyExitPage(screeningExitMessage);
+                };
 
                 function launchStudy() {
                     blurb.hidden = true;
@@ -106,9 +122,14 @@
 
                 if (
                     sessionStorage.getItem(responseKey) === 'no' ||
-                    sessionStorage.getItem(consentResponseKey) === 'no'
+                    sessionStorage.getItem(consentResponseKey) === 'no' ||
+                    sessionStorage.getItem(demographicsScreeningKey) === 'ineligible'
                 ) {
-                    showExitPage();
+                    showExitPage(
+                        sessionStorage.getItem(demographicsScreeningKey) === 'ineligible'
+                            ? screeningExitMessage
+                            : defaultExitMessage
+                    );
                     return;
                 }
 

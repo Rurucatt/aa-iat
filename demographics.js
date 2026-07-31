@@ -229,6 +229,46 @@ define(['questAPI'], function(Quest){
             scrollToElement(target);
         }
 
+        function optionSelectedByText(text){
+            var options = document.querySelectorAll('[piq-page] .demographics-choice-option');
+            for (var i = 0; i < options.length; i++){
+                if (cleanText(options[i]) === text && selected(options[i])) return true;
+            }
+            return false;
+        }
+
+        function stateOtherSelected(){
+            var option = findOption({
+                optionText: 'I study in a state that is not listed above (specify)'
+            });
+            return !!(option && selected(option));
+        }
+
+        function showScreenOutPage(){
+            if (document.documentElement.getAttribute('data-demographics-screened-out')) return;
+            document.documentElement.setAttribute('data-demographics-screened-out', 'true');
+
+            if (window.showDemographicsScreenOutPage){
+                window.showDemographicsScreenOutPage();
+                return;
+            }
+
+            sessionStorage.setItem('demographics_screening_response', 'ineligible');
+            var container = document.querySelector('.container');
+            if (container) container.style.display = 'none';
+            var exitPage = document.getElementById('exit-page');
+            var exitPageMessage = document.getElementById('exit-page-message');
+            if (exitPageMessage){
+                exitPageMessage.textContent = 'Thank you so much for taking part in our study! Unfortunately, you do not meet criteria for the study, but we thank you for your interest and your time.';
+            }
+            if (exitPage) exitPage.hidden = false;
+            document.title = 'Thank You';
+        }
+
+        function screeningFailed(){
+            return optionSelectedByText('No') || stateOtherSelected();
+        }
+
         function watchSubmitForIncompleteQuestions(){
             if (document.documentElement.getAttribute('data-demographics-submit-scroll')) return;
             document.documentElement.setAttribute('data-demographics-submit-scroll', 'true');
@@ -240,6 +280,14 @@ define(['questAPI'], function(Quest){
                 var action = submit.getAttribute('ng-click') || submit.getAttribute('data-ng-click') || '';
                 var text = cleanText(submit).toLowerCase();
                 if (action.indexOf('submit') === -1 && text !== 'submit') return;
+
+                if (!firstManualIncompleteQuestion() && screeningFailed()){
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    showScreenOutPage();
+                    return;
+                }
 
                 setTimeout(scrollToFirstIncompleteQuestion, 100);
                 setTimeout(scrollToFirstIncompleteQuestion, 300);
