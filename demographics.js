@@ -64,7 +64,8 @@ define(['questAPI'], function(Quest){
             'Please enter your race.',
             'Please select your ethnicity.',
             'Are you able to read and understand English?',
-            'Are you able to complete this study on a personal device with a keyboard?'
+            'Are you able to complete this study on a personal device with a keyboard?',
+            'If you are interested in being entered into the raffle to win a $20 Amazon gift card, please enter your email (Please note that you must be eligible for, and complete the study to be entered into the raffle to win the gift card):'
         ];
 
         var raceOptionTexts = [
@@ -544,6 +545,14 @@ define(['questAPI'], function(Quest){
         ]
 	}); 
 
+    API.addQuestionsSet('raffleEmail',{
+        inherit: 'demographicsText',
+        name: 'raffle_email',
+        required: false,
+        stem: 'If you are interested in being entered into the raffle to win a $20 Amazon gift card, please enter your email (Please note that you must be eligible for, and complete the study to be entered into the raffle to win the gift card):',
+        inputType: 'email'
+    });
+
     API.addSequence([{
         inherit: 'demographicsPage',
         questions: [
@@ -561,7 +570,8 @@ define(['questAPI'], function(Quest){
             {inherit: 'raceOther'},
             {inherit: 'ethnicity'},
             {inherit: 'englishComprehension'},
-            {inherit: 'keyboardDevice'}
+            {inherit: 'keyboardDevice'},
+            {inherit: 'raffleEmail'}
         ]
     }]);
 
