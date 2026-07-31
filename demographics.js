@@ -25,6 +25,7 @@ define(['questAPI'], function(Quest){
                 '.demographics-choice-option.multi-choice-option.active::after, .demographics-choice-option.multi-choice-option.btn-primary::after, .demographics-choice-option.multi-choice-option.btn-info::after, .demographics-choice-option.multi-choice-option[aria-pressed="true"]::after, .demographics-choice-option.multi-choice-option[aria-checked="true"]::after { border-radius: 2px; }',
                 '.demographics-question-stem { font-weight: 700 !important; }',
                 '.demographics-question-stem::before, .demographics-question-stem::after { content: none !important; }',
+                '.demographics-question-stem.demographics-required-stem::before { content: "*" !important; display: inline-block; margin-right: 6px; color: #c9302c; font-weight: 700; }',
                 '.inline-other-hidden-question { display: none !important; }',
                 '@media (max-width: 600px) { .inline-other-answer { display: flex; margin: 8px 0 0; } .inline-other-answer input, .inline-other-answer textarea { width: 100%; } }'
             ].join('\n');
@@ -75,6 +76,13 @@ define(['questAPI'], function(Quest){
             'Native Hawaiian or Other Pacific Islander',
             'White',
             'Other (specify)'
+        ];
+
+        var optionalQuestionStems = [
+            'Please enter the state in which you study.',
+            'Please enter your gender identity.',
+            'Please enter your race.',
+            'If you are interested in being entered into the raffle to win a $20 Amazon gift card, please enter your email (Please note that you must be eligible for, and complete the study to be entered into the raffle to win the gift card):'
         ];
 
         function cleanText(element){
@@ -267,6 +275,11 @@ define(['questAPI'], function(Quest){
                 if (textIsOneOf(cleanText(candidate), questionStems) && controlCount(candidate) === 0){
                     candidate.classList.add('demographics-question-stem');
                     candidate.classList.remove('demographics-choice-option', 'radio-choice-option', 'multi-choice-option');
+                    if (textIsOneOf(cleanText(candidate), optionalQuestionStems)){
+                        candidate.classList.remove('demographics-required-stem');
+                    } else {
+                        candidate.classList.add('demographics-required-stem');
+                    }
                 }
             });
         }
@@ -279,6 +292,11 @@ define(['questAPI'], function(Quest){
                 if (textIsOneOf(cleanText(option), questionStems)){
                     option.classList.remove('demographics-choice-option', 'radio-choice-option', 'multi-choice-option');
                     option.classList.add('demographics-question-stem');
+                    if (textIsOneOf(cleanText(option), optionalQuestionStems)){
+                        option.classList.remove('demographics-required-stem');
+                    } else {
+                        option.classList.add('demographics-required-stem');
+                    }
                     return;
                 }
 
@@ -340,7 +358,7 @@ define(['questAPI'], function(Quest){
 	    API.addQuestionsSet('demographicsSelect',{
         inherit: 'basicSelect',
         autoSubmit: false,
-        required: false
+        required: true
     });
 
     API.addQuestionsSet('basicDropdown',{
@@ -357,7 +375,7 @@ define(['questAPI'], function(Quest){
 
 	    API.addQuestionsSet('demographicsText',{
         inherit: 'basicText',
-        required: false
+        required: true
     });
 
     API.addQuestionsSet('basicMultiSelect',{
@@ -371,7 +389,7 @@ define(['questAPI'], function(Quest){
 
     API.addQuestionsSet('demographicsMultiSelect',{
         inherit: 'basicMultiSelect',
-        required: false
+        required: true
     });
 	
 	
