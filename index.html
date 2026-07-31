@@ -76,6 +76,7 @@
         <script>
             (function () {
                 var responseKey = 'screening_blurb_response';
+                var consentResponseKey = 'consent_response';
                 var form = document.getElementById('study-blurb-form');
                 var blurb = document.getElementById('study-blurb');
                 var exitPage = document.getElementById('exit-page');
@@ -103,7 +104,10 @@
                     document.head.appendChild(scriptTag);
                 }
 
-                if (sessionStorage.getItem(responseKey) === 'no') {
+                if (
+                    sessionStorage.getItem(responseKey) === 'no' ||
+                    sessionStorage.getItem(consentResponseKey) === 'no'
+                ) {
                     showExitPage();
                     return;
                 }

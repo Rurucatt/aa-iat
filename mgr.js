@@ -76,6 +76,14 @@ define(['managerAPI',
             scriptUrl: 'demographics.js'
         }],
 
+        consent: [{
+            inherit: 'instructions',
+            name: 'consent',
+            templateUrl: 'consent.jst',
+            title: 'Consent',
+            header: 'Consent to Participate'
+        }],
+
         raceiat: [{
             type: 'time',
             name: 'raceiat',
@@ -147,6 +155,7 @@ define(['managerAPI',
         // Intro page is temporarily disabled.
         // {inherit: 'intro'},
         {inherit: 'demographics'},
+        {inherit: 'consent'},
         {
             // Force the instructions to precede the IAT.
             mixer: 'wrapper',
