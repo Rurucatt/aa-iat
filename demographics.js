@@ -1,6 +1,17 @@
 define(['questAPI'], function(Quest){
     var API = new Quest();
 
+    function todayISO(){
+        var today = new Date();
+        var month = String(today.getMonth() + 1);
+        var day = String(today.getDate());
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+
+        return today.getFullYear() + '-' + month + '-' + day;
+    }
+
     // Quest renders the three free-text "Other" answers as separate questions.
     // Move only their existing input elements into the matching option label;
     // Quest still owns the inputs and their values.
@@ -336,6 +347,35 @@ define(['questAPI'], function(Quest){
             });
         }
 
+        function setDateOfBirthBounds(){
+            function applyBounds(input){
+                input.setAttribute('type', 'date');
+                input.setAttribute('min', '1950-01-01');
+                input.setAttribute('max', todayISO());
+            }
+
+            var inputs = document.querySelectorAll('[piq-page] input');
+            Array.prototype.forEach.call(inputs, function(input){
+                var attrs = [
+                    input.getAttribute('name'),
+                    input.getAttribute('id'),
+                    input.getAttribute('ng-model'),
+                    input.getAttribute('data-ng-model')
+                ].join(' ');
+
+                if (input.getAttribute('type') === 'date' || attrs.indexOf('date_of_birth') !== -1){
+                    applyBounds(input);
+                }
+            });
+
+            var stem = findStemElement('Please enter your date of birth.');
+            var container = stem ? findQuestionContainer(stem) : null;
+            if (!container) return;
+
+            var dateInputs = container.querySelectorAll('input:not([type="hidden"])');
+            Array.prototype.forEach.call(dateInputs, applyBounds);
+        }
+
         function moveInput(item){
             var input = findInput(item);
             if (!input || input.getAttribute('data-inline-other')) return;
@@ -416,6 +456,7 @@ define(['questAPI'], function(Quest){
 
         function enhance(){
             items.forEach(moveInput);
+            setDateOfBirthBounds();
             markQuestionStems();
             markChoiceOptions();
             watchSubmitForIncompleteQuestions();
@@ -613,7 +654,9 @@ define(['questAPI'], function(Quest){
         inherit: 'demographicsText',
         name: 'date_of_birth',
         stem: 'Please enter your date of birth.',
-        inputType: 'date'
+        inputType: 'date',
+        min: '1950-01-01',
+        max: todayISO()
     });
 
     API.addQuestionsSet('age',{
