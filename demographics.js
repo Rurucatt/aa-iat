@@ -454,7 +454,16 @@ define(['questAPI'], function(Quest){
             document.addEventListener('click', clearIfDeselected, false);
         }
 
+        function demographicsPageActive(){
+            for (var i = 0; i < questionStems.length; i++){
+                if (findStemElement(questionStems[i])) return true;
+            }
+            return false;
+        }
+
         function enhance(){
+            if (!demographicsPageActive()) return;
+
             items.forEach(moveInput);
             setDateOfBirthBounds();
             markQuestionStems();

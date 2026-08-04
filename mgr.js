@@ -90,6 +90,12 @@ define(['managerAPI',
             scriptUrl: 'raceiat.js'
         }],
 
+        IM4: [{
+            type: 'quest',
+            name: 'IM4',
+            scriptUrl: 'im4.js'
+        }],
+
         lastpage: [{
             type: 'message',
             name: 'lastpage',
@@ -172,6 +178,7 @@ define(['managerAPI',
                 {inherit: 'raceiat'}
             ]
         },
+        {inherit: 'IM4'},
 
 		{inherit: 'uploading'},
         {inherit: 'debriefing'},
