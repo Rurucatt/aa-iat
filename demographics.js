@@ -37,6 +37,7 @@ define(['questAPI'], function(Quest){
                 '.demographics-question-stem { font-weight: 700 !important; }',
                 '.demographics-question-stem::before, .demographics-question-stem::after { content: none !important; }',
                 '.demographics-question-stem.demographics-required-stem::before { content: "*" !important; display: inline-block; margin-right: 6px; color: #c9302c; font-weight: 700; }',
+                '[piq-page] .glyphicon-warning-sign, [piq-page] .glyphicon-exclamation-sign, [piq-page] .text-danger::before, [piq-page] .alert-danger::before, [piq-page] .help-block::before { content: none !important; display: none !important; }',
                 '.demographics-scroll-target { outline: 2px solid rgba(201, 48, 44, 0.35); outline-offset: 4px; }',
                 '.inline-other-hidden-question { display: none !important; }',
                 '@media (max-width: 600px) { .inline-other-answer { display: flex; margin: 8px 0 0; } .inline-other-answer input, .inline-other-answer textarea { width: 100%; } }'
@@ -305,6 +306,29 @@ define(['questAPI'], function(Quest){
             }, true);
         }
 
+        function watchSelectedSingleChoiceOptions(){
+            if (document.documentElement.getAttribute('data-demographics-radio-watch')) return;
+            document.documentElement.setAttribute('data-demographics-radio-watch', 'true');
+
+            document.addEventListener('click', function(event){
+                if (!demographicsPageActive()) return;
+
+                var option = event.target.closest('.demographics-choice-option.radio-choice-option');
+                if (!option || !option.closest('[piq-page]')) return;
+                if (event.target.closest('.inline-other-answer input, .inline-other-answer textarea')) return;
+                if (!selected(option)) return;
+
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+
+                var inlineField = option.querySelector('.inline-other-answer input, .inline-other-answer textarea');
+                if (inlineField) {
+                    setTimeout(function(){ inlineField.focus(); }, 0);
+                }
+            }, true);
+        }
+
         function findSafeQuestionBlock(input, item){
             var current = input.parentElement;
             while (current && current !== document.body && !current.hasAttribute('piq-page')){
@@ -468,6 +492,7 @@ define(['questAPI'], function(Quest){
             setDateOfBirthBounds();
             markQuestionStems();
             markChoiceOptions();
+            watchSelectedSingleChoiceOptions();
             watchSubmitForIncompleteQuestions();
         }
 
@@ -544,7 +569,7 @@ define(['questAPI'], function(Quest){
     //        required: isTouch 
     //            ? 'Please select an answer, or click \'Decline\'' 
     //            : 'Please select an answer, or click \'Decline to Answer\''
-        	required: 'Please answer this question before submitting.'
+        	required: 'This question is required.'
 		},
         autoSubmit:'true',
         numericValues:'true',
@@ -585,7 +610,7 @@ define(['questAPI'], function(Quest){
         type: 'selectMulti',
         autoSubmit: false,
         errorMsg: {
-            required: 'Please select at least one answer before submitting.'
+            required: 'This question is required.'
         }
     });
 
@@ -679,7 +704,7 @@ define(['questAPI'], function(Quest){
         step: 1,
         pattern: '^[0-9]+$',
         errorMsg: {
-            required: 'Please enter your age as a whole number.',
+            required: 'This question is required.',
             pattern: 'Please enter your age as a whole number.'
         }
     });

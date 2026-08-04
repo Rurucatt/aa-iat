@@ -20,6 +20,7 @@ define(['questAPI'], function(Quest){
                 '[piq-page] .im4-choice-option, [piq-page] .im4-choice-option:hover, [piq-page] .im4-choice-option:focus, [piq-page] .im4-choice-option:active, [piq-page] .im4-choice-option.active, [piq-page] .im4-choice-option.btn-primary, [piq-page] .im4-choice-option.btn-info { display: block; width: 100%; margin: 6px 0; padding: 6px 10px 6px 34px !important; color: #222 !important; background: #fff !important; border: 0 !important; box-shadow: none !important; text-align: left; white-space: normal; position: relative; }',
                 '[piq-page] .im4-choice-option::before { content: ""; position: absolute; left: 8px; top: 50%; width: 16px; height: 16px; margin-top: -8px; border: 1.5px solid #777; border-radius: 50%; background: #fff; }',
                 '[piq-page] .im4-choice-option.active::after, [piq-page] .im4-choice-option.btn-primary::after, [piq-page] .im4-choice-option.btn-info::after, [piq-page] .im4-choice-option[aria-pressed="true"]::after, [piq-page] .im4-choice-option[aria-checked="true"]::after { content: ""; position: absolute; left: 12px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: #337ab7; }',
+                '[piq-page] .glyphicon-warning-sign, [piq-page] .glyphicon-exclamation-sign, [piq-page] .text-danger::before, [piq-page] .alert-danger::before, [piq-page] .help-block::before { content: none !important; display: none !important; }',
                 '.im4-scroll-target { outline: 2px solid rgba(201, 48, 44, 0.35); outline-offset: 4px; }'
             ].join('\n');
             document.head.appendChild(style);
@@ -214,7 +215,7 @@ define(['questAPI'], function(Quest){
         decline: false,
         required: true,
         errorMsg: {
-            required: 'Please select an answer before submitting.'
+            required: 'This question is required.'
         },
         autoSubmit: 'true',
         numericValues: 'true',
