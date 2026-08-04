@@ -99,6 +99,14 @@ define(['managerAPI',
             //last:true, 
             header: 'You have completed the study'
         }], 
+
+        debriefing: [{
+            type: 'message',
+            name: 'debriefing',
+            templateUrl: 'debriefing.jst',
+            title: 'Deception Debriefing Form',
+            header: 'Deception Debriefing Form'
+        }],
         
         //Use if you want to redirect the participants elsewhere at the end of the study
         redirect:
@@ -166,7 +174,7 @@ define(['managerAPI',
         },
 
 		{inherit: 'uploading'},
-        {inherit: 'lastpage'},
+        {inherit: 'debriefing'},
         {inherit: 'redirect'}
     ]);
 
