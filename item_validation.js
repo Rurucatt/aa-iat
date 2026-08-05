@@ -196,11 +196,14 @@ define(['questAPI'], function(Quest){
                 var text = cleanText(submit).toLowerCase();
                 if (action.indexOf('submit') === -1 && text !== 'submit') return;
 
+                var incompleteBeforeSubmit = firstIncompleteStem();
+                if (!incompleteBeforeSubmit) return;
+
                 setTimeout(function(){
-                    scrollToElement(firstIncompleteStem());
+                    scrollToElement(incompleteBeforeSubmit);
                 }, 100);
                 setTimeout(function(){
-                    scrollToElement(firstIncompleteStem());
+                    scrollToElement(incompleteBeforeSubmit);
                 }, 300);
             }, true);
         }
