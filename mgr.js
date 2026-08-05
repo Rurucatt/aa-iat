@@ -84,6 +84,12 @@ define(['managerAPI',
             header: 'Consent to Participate'
         }],
 
+        item_validation: [{
+            type: 'quest',
+            name: 'item_validation',
+            scriptUrl: 'item_validation.js'
+        }],
+
         raceiat: [{
             type: 'time',
             name: 'raceiat',
@@ -170,6 +176,7 @@ define(['managerAPI',
         // {inherit: 'intro'},
         {inherit: 'demographics'},
         {inherit: 'consent'},
+        {inherit: 'item_validation'},
         {
             // Force the instructions to precede the IAT.
             mixer: 'wrapper',

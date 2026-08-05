@@ -1,0 +1,313 @@
+define(['questAPI'], function(Quest){
+    var API = new Quest();
+
+    function enhanceItemValidationUi(){
+        if (typeof document === 'undefined') return;
+
+        if (!document.getElementById('item-validation-style')){
+            var style = document.createElement('style');
+            style.id = 'item-validation-style';
+            style.textContent = [
+                '[piq-page] li { list-style-type: none; }',
+                '[piq-page] li::marker { content: ""; font-size: 0; }',
+                '[piq-page] [ng-click="decline($event)"], [piq-page] [data-ng-click="decline($event)"] { display: none !important; }',
+                '[piq-page] .item-validation-question-stem, [piq-page] .item-validation-required-stem { display: block; width: auto; margin: 0 0 0.5em; padding: 0 !important; color: #222 !important; background: transparent !important; border: 0 !important; box-shadow: none !important; text-align: left; white-space: normal; position: static; font-weight: 700 !important; }',
+                '[piq-page] .item-validation-question-stem::before, [piq-page] .item-validation-required-stem::before, [piq-page] .item-validation-question-stem::after, [piq-page] .item-validation-required-stem::after { content: none !important; display: none !important; }',
+                '[piq-page] .item-validation-required-star { display: inline-block; margin-right: 6px; color: #c9302c; font-weight: 700; }',
+                '[piq-page] .item-validation-choice-option, [piq-page] .item-validation-choice-option:hover, [piq-page] .item-validation-choice-option:focus, [piq-page] .item-validation-choice-option:active, [piq-page] .item-validation-choice-option.active, [piq-page] .item-validation-choice-option.btn-primary, [piq-page] .item-validation-choice-option.btn-info { display: block; width: 100%; margin: 6px 0; padding: 6px 10px 6px 34px !important; color: #222 !important; background: #fff !important; border: 0 !important; box-shadow: none !important; text-align: left; white-space: normal; position: relative; }',
+                '[piq-page] .item-validation-choice-option::before { content: ""; position: absolute; left: 8px; top: 50%; width: 16px; height: 16px; margin-top: -8px; border: 1.5px solid #777; border-radius: 50%; background: #fff; }',
+                '[piq-page] .item-validation-choice-option.active::after, [piq-page] .item-validation-choice-option.btn-primary::after, [piq-page] .item-validation-choice-option.btn-info::after, [piq-page] .item-validation-choice-option[aria-pressed="true"]::after, [piq-page] .item-validation-choice-option[aria-checked="true"]::after { content: ""; position: absolute; left: 12px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: #337ab7; }',
+                '[piq-page] .glyphicon-warning-sign, [piq-page] .glyphicon-exclamation-sign, [piq-page] .text-danger::before, [piq-page] .alert-danger::before, [piq-page] .help-block::before { content: none !important; display: none !important; }',
+                '.item-validation-scroll-target { outline: 2px solid rgba(201, 48, 44, 0.35); outline-offset: 4px; }'
+            ].join('\n');
+            document.head.appendChild(style);
+        }
+
+        var familiarityAnswers = [
+            'Extremely Familiar',
+            'Very Familiar',
+            'Familiar',
+            'Moderately Familiar',
+            'Somewhat Familiar',
+            'Slightly Familiar',
+            'Not At All Familiar'
+        ];
+
+        function cleanText(element){
+            return (element && element.textContent || '').replace(/\s+/g, ' ').trim();
+        }
+
+        function visible(element){
+            return !!(element && (element.offsetWidth || element.offsetHeight || element.getClientRects().length));
+        }
+
+        function controlCount(element){
+            return element.querySelectorAll('input:not([type="hidden"]), textarea, select, button, .btn').length;
+        }
+
+        function textIsOneOf(text, values){
+            for (var i = 0; i < values.length; i++){
+                if (text === values[i]) return true;
+            }
+            return false;
+        }
+
+        function selected(option){
+            return option.classList.contains('active') ||
+                option.classList.contains('btn-primary') ||
+                option.classList.contains('btn-info') ||
+                option.getAttribute('aria-pressed') === 'true' ||
+                option.getAttribute('aria-checked') === 'true';
+        }
+
+        function findQuestionContainer(element){
+            var selectors = ['li', '[pi-question]', '[piq-question]', '.form-group'];
+            for (var i = 0; i < selectors.length; i++){
+                var container = element.closest(selectors[i]);
+                if (container && container.closest('[piq-page]')) return container;
+            }
+            return element;
+        }
+
+        function questionAnswered(container){
+            var options = container.querySelectorAll('.item-validation-choice-option');
+            for (var i = 0; i < options.length; i++){
+                if (selected(options[i])) return true;
+            }
+            return false;
+        }
+
+        function firstIncompleteStem(){
+            var stemsInPage = document.querySelectorAll('[piq-page] .item-validation-question-stem, [piq-page] .item-validation-required-stem');
+            for (var i = 0; i < stemsInPage.length; i++){
+                if (!visible(stemsInPage[i])) continue;
+                if (!questionAnswered(findQuestionContainer(stemsInPage[i]))) return stemsInPage[i];
+            }
+            return null;
+        }
+
+        function scrollToElement(element){
+            if (!element) return;
+
+            element.scrollIntoView({behavior: 'smooth', block: 'center'});
+            element.classList.add('item-validation-scroll-target');
+            setTimeout(function(){
+                element.classList.remove('item-validation-scroll-target');
+            }, 1200);
+        }
+
+        function markStems(){
+            var candidates = document.querySelectorAll('[piq-page] .item-validation-question-stem, [piq-page] label, [piq-page] p, [piq-page] span, [piq-page] div');
+            Array.prototype.forEach.call(candidates, function(candidate){
+                if (!visible(candidate) || controlCount(candidate) !== 0) return;
+                if (candidate.classList.contains('item-validation-question-stem')){
+                    candidate.classList.remove('demographics-choice-option', 'radio-choice-option', 'multi-choice-option');
+                    candidate.classList.add('item-validation-required-stem');
+                }
+            });
+        }
+
+        function markChoiceOptions(){
+            var candidates = document.querySelectorAll('[piq-page] .btn, [piq-page] button, [piq-page] label, [piq-page] [role="button"]');
+            Array.prototype.forEach.call(candidates, function(option){
+                var action = option.getAttribute('ng-click') || option.getAttribute('data-ng-click') || '';
+                if (action.indexOf('submit') !== -1 || !visible(option)) return;
+                if (!textIsOneOf(cleanText(option), familiarityAnswers)) return;
+
+                option.classList.remove('demographics-choice-option', 'radio-choice-option', 'multi-choice-option');
+                option.classList.add('item-validation-choice-option');
+            });
+        }
+
+        function watchSelectedOptions(){
+            if (document.documentElement.getAttribute('data-item-validation-radio-watch')) return;
+            document.documentElement.setAttribute('data-item-validation-radio-watch', 'true');
+
+            document.addEventListener('click', function(event){
+                var option = event.target.closest('.item-validation-choice-option');
+                if (!option || !option.closest('[piq-page]')) return;
+                if (!selected(option)) return;
+
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+            }, true);
+        }
+
+        function watchSubmitForIncompleteQuestions(){
+            if (document.documentElement.getAttribute('data-item-validation-submit-scroll')) return;
+            document.documentElement.setAttribute('data-item-validation-submit-scroll', 'true');
+
+            document.addEventListener('click', function(event){
+                var submit = event.target.closest('[ng-click], [data-ng-click], button, .btn');
+                if (!submit || !submit.closest('[piq-page]')) return;
+
+                var action = submit.getAttribute('ng-click') || submit.getAttribute('data-ng-click') || '';
+                var text = cleanText(submit).toLowerCase();
+                if (action.indexOf('submit') === -1 && text !== 'submit') return;
+
+                setTimeout(function(){
+                    scrollToElement(firstIncompleteStem());
+                }, 100);
+                setTimeout(function(){
+                    scrollToElement(firstIncompleteStem());
+                }, 300);
+            }, true);
+        }
+
+        function enhance(){
+            markStems();
+            markChoiceOptions();
+            watchSelectedOptions();
+            watchSubmitForIncompleteQuestions();
+        }
+
+        var observer = new MutationObserver(enhance);
+        observer.observe(document.body, {childList: true, subtree: true});
+        enhance();
+    }
+
+    enhanceItemValidationUi();
+
+    API.addPagesSet('basicPage',{
+        noSubmit: false,
+        header: 'Questionnaire',
+        decline: false
+    });
+
+    API.addPagesSet('itemValidationPage',{
+        inherit: 'basicPage',
+        autoFocus: false,
+        header: 'Item Validation Questions'
+    });
+
+    API.addQuestionsSet('basicQ',{
+        decline: false,
+        required: true,
+        errorMsg: {
+            required: 'This question is required.'
+        },
+        autoSubmit: 'true',
+        numericValues: 'true'
+    });
+
+    API.addQuestionsSet('basicSelect',{
+        inherit: 'basicQ',
+        type: 'selectOne'
+    });
+
+    API.addQuestionsSet('familiarityScale',{
+        inherit: 'basicSelect',
+        answers: [
+            {text: 'Extremely Familiar', value: 7},
+            {text: 'Very Familiar', value: 6},
+            {text: 'Familiar', value: 5},
+            {text: 'Moderately Familiar', value: 4},
+            {text: 'Somewhat Familiar', value: 3},
+            {text: 'Slightly Familiar', value: 2},
+            {text: 'Not At All Familiar', value: 1}
+        ]
+    });
+
+    var itemValidationInstructionsHtml = [
+        '<div style="margin: 0 0 18px; padding: 14px 16px; border: 1px solid #d9d9d9; border-left: 5px solid #222; background: #f7f7f7; border-radius: 4px;">',
+        '<div style="font-weight: 700; font-size: 1.05em;">Instructions: Please rate your familiarity with each word on a scale from &lsquo;Not At All Familiar&rsquo; to &lsquo;Very Familiar.&rsquo;</div>',
+        '</div>'
+    ].join('');
+
+    function questionStem(text){
+        return '<span class="item-validation-question-stem"><span class="item-validation-required-star">*</span>' + text + '</span>';
+    }
+
+    API.addQuestionsSet('successful',{
+        inherit: 'familiarityScale',
+        name: 'item_validation_successful',
+        stem: itemValidationInstructionsHtml + questionStem('Successful')
+    });
+
+    API.addQuestionsSet('rebellious',{
+        inherit: 'familiarityScale',
+        name: 'item_validation_rebellious',
+        stem: questionStem('Rebellious')
+    });
+
+    API.addQuestionsSet('hardWorking',{
+        inherit: 'familiarityScale',
+        name: 'item_validation_hard_working',
+        stem: questionStem('Hard-working')
+    });
+
+    API.addQuestionsSet('lazy',{
+        inherit: 'familiarityScale',
+        name: 'item_validation_lazy',
+        stem: questionStem('Lazy')
+    });
+
+    API.addQuestionsSet('intelligent',{
+        inherit: 'familiarityScale',
+        name: 'item_validation_intelligent',
+        stem: questionStem('Intelligent')
+    });
+
+    API.addQuestionsSet('studious',{
+        inherit: 'familiarityScale',
+        name: 'item_validation_studious',
+        stem: questionStem('Studious')
+    });
+
+    API.addQuestionsSet('distracted',{
+        inherit: 'familiarityScale',
+        name: 'item_validation_distracted',
+        stem: questionStem('Distracted')
+    });
+
+    API.addQuestionsSet('focused',{
+        inherit: 'familiarityScale',
+        name: 'item_validation_focused',
+        stem: questionStem('Focused')
+    });
+
+    API.addQuestionsSet('irresponsible',{
+        inherit: 'familiarityScale',
+        name: 'item_validation_irresponsible',
+        stem: questionStem('Irresponsible')
+    });
+
+    API.addQuestionsSet('disengaged',{
+        inherit: 'familiarityScale',
+        name: 'item_validation_disengaged',
+        stem: questionStem('Disengaged')
+    });
+
+    API.addQuestionsSet('smart',{
+        inherit: 'familiarityScale',
+        name: 'item_validation_smart',
+        stem: questionStem('Smart')
+    });
+
+    API.addQuestionsSet('slacker',{
+        inherit: 'familiarityScale',
+        name: 'item_validation_slacker',
+        stem: questionStem('Slacker')
+    });
+
+    API.addSequence([{
+        inherit: 'itemValidationPage',
+        questions: [
+            {inherit: 'successful'},
+            {inherit: 'rebellious'},
+            {inherit: 'hardWorking'},
+            {inherit: 'lazy'},
+            {inherit: 'intelligent'},
+            {inherit: 'studious'},
+            {inherit: 'distracted'},
+            {inherit: 'focused'},
+            {inherit: 'irresponsible'},
+            {inherit: 'disengaged'},
+            {inherit: 'smart'},
+            {inherit: 'slacker'}
+        ]
+    }]);
+
+    return API.script;
+});
