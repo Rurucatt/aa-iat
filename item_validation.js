@@ -33,6 +33,40 @@ define(['questAPI'], function(Quest){
             'Not At All Familiar'
         ];
 
+        var meaningAnswers = [
+            'Talks a lot',
+            'Fails often',
+            'Does well',
+            'Breaks rules',
+            'Studies often',
+            'Resists rules',
+            'Works hard',
+            'Follows rules',
+            'Gets distracted',
+            'Avoids effort',
+            'Makes noise',
+            'Pays attention',
+            'Avoids work',
+            'Full of energy',
+            'Learns quickly',
+            'Not interested',
+            'Makes mistakes',
+            'Talks loudly',
+            'Causes trouble',
+            'Cannot focus',
+            'Quiet and calm',
+            'Not reliable',
+            'Very reliable',
+            'Not involved',
+            'Very interested',
+            'Careless',
+            'Thinks quickly',
+            'Lazy',
+            'Loud',
+            'Very focused',
+            'Lacks effort'
+        ];
+
         function cleanText(element){
             return (element && element.textContent || '').replace(/\s+/g, ' ').trim();
         }
@@ -112,10 +146,26 @@ define(['questAPI'], function(Quest){
             Array.prototype.forEach.call(candidates, function(option){
                 var action = option.getAttribute('ng-click') || option.getAttribute('data-ng-click') || '';
                 if (action.indexOf('submit') !== -1 || !visible(option)) return;
-                if (!textIsOneOf(cleanText(option), familiarityAnswers)) return;
+                if (option.classList.contains('item-validation-required-stem') || option.querySelector('.item-validation-question-stem')) return;
+                if (!textIsOneOf(cleanText(option), familiarityAnswers) && !textIsOneOf(cleanText(option), meaningAnswers)) return;
 
                 option.classList.remove('demographics-choice-option', 'radio-choice-option', 'multi-choice-option');
                 option.classList.add('item-validation-choice-option');
+            });
+        }
+
+        function updateSubmitButtonText(){
+            var page = document.querySelector('[piq-page]');
+            if (!page) return;
+
+            var pageText = cleanText(page);
+            var submitText = pageText.indexOf('Instructions: Please rate your familiarity') !== -1 ? 'Next' : 'Submit';
+            var candidates = page.querySelectorAll('[ng-click], [data-ng-click], button, .btn');
+            Array.prototype.forEach.call(candidates, function(button){
+                var action = button.getAttribute('ng-click') || button.getAttribute('data-ng-click') || '';
+                var text = cleanText(button).toLowerCase();
+                if (action.indexOf('submit') === -1 && text !== 'submit' && text !== 'next') return;
+                if (button.textContent !== submitText) button.textContent = submitText;
             });
         }
 
@@ -158,6 +208,7 @@ define(['questAPI'], function(Quest){
         function enhance(){
             markStems();
             markChoiceOptions();
+            updateSubmitButtonText();
             watchSelectedOptions();
             watchSubmitForIncompleteQuestions();
         }
@@ -209,9 +260,135 @@ define(['questAPI'], function(Quest){
         ]
     });
 
+    API.addQuestionsSet('meaningSuccessfulScale',{
+        inherit: 'basicSelect',
+        answers: [
+            {text: 'Talks a lot', value: -1},
+            {text: 'Fails often', value: -2},
+            {text: 'Does well', value: 1},
+            {text: 'Breaks rules', value: -3}
+        ]
+    });
+
+    API.addQuestionsSet('meaningRebelliousScale',{
+        inherit: 'basicSelect',
+        answers: [
+            {text: 'Studies often', value: -1},
+            {text: 'Resists rules', value: 1},
+            {text: 'Works hard', value: -2},
+            {text: 'Follows rules', value: -3}
+        ]
+    });
+
+    API.addQuestionsSet('meaningHardWorkingScale',{
+        inherit: 'basicSelect',
+        answers: [
+            {text: 'Gets distracted', value: -1},
+            {text: 'Works hard', value: 1},
+            {text: 'Avoids effort', value: -2},
+            {text: 'Makes noise', value: -3}
+        ]
+    });
+
+    API.addQuestionsSet('meaningLazyScale',{
+        inherit: 'basicSelect',
+        answers: [
+            {text: 'Follows rules', value: -1},
+            {text: 'Pays attention', value: -2},
+            {text: 'Avoids work', value: 1},
+            {text: 'Full of energy', value: -3}
+        ]
+    });
+
+    API.addQuestionsSet('meaningIntelligentScale',{
+        inherit: 'basicSelect',
+        answers: [
+            {text: 'Learns quickly', value: 1},
+            {text: 'Not interested', value: -1},
+            {text: 'Breaks rules', value: -2},
+            {text: 'Makes mistakes', value: -3}
+        ]
+    });
+
+    API.addQuestionsSet('meaningStudiousScale',{
+        inherit: 'basicSelect',
+        answers: [
+            {text: 'Avoids work', value: -1},
+            {text: 'Talks loudly', value: -2},
+            {text: 'Studies often', value: 1},
+            {text: 'Causes trouble', value: -3}
+        ]
+    });
+
+    API.addQuestionsSet('meaningDistractedScale',{
+        inherit: 'basicSelect',
+        answers: [
+            {text: 'Works hard', value: -1},
+            {text: 'Cannot focus', value: 1},
+            {text: 'Pays attention', value: -2},
+            {text: 'Follows rules', value: -3}
+        ]
+    });
+
+    API.addQuestionsSet('meaningFocusedScale',{
+        inherit: 'basicSelect',
+        answers: [
+            {text: 'Not interested', value: -1},
+            {text: 'Lazy', value: -2},
+            {text: 'Breaks rules', value: -3},
+            {text: 'Pays attention', value: 1}
+        ]
+    });
+
+    API.addQuestionsSet('meaningIrresponsibleScale',{
+        inherit: 'basicSelect',
+        answers: [
+            {text: 'Quiet and calm', value: -1},
+            {text: 'Studies often', value: -2},
+            {text: 'Not reliable', value: 1},
+            {text: 'Very reliable', value: -3}
+        ]
+    });
+
+    API.addQuestionsSet('meaningDisengagedScale',{
+        inherit: 'basicSelect',
+        answers: [
+            {text: 'Not involved', value: 1},
+            {text: 'Very interested', value: -1},
+            {text: 'Follows rules', value: -2},
+            {text: 'Works hard', value: -3}
+        ]
+    });
+
+    API.addQuestionsSet('meaningSmartScale',{
+        inherit: 'basicSelect',
+        answers: [
+            {text: 'Careless', value: -1},
+            {text: 'Thinks quickly', value: 1},
+            {text: 'Lazy', value: -2},
+            {text: 'Loud', value: -3}
+        ]
+    });
+
+    API.addQuestionsSet('meaningSlackerScale',{
+        inherit: 'basicSelect',
+        answers: [
+            {text: 'Studies often', value: -1},
+            {text: 'Very focused', value: -2},
+            {text: 'Lacks effort', value: 1},
+            {text: 'Follows rules', value: -3}
+        ]
+    });
+
     var itemValidationInstructionsHtml = [
         '<div style="margin: 0 0 18px; padding: 14px 16px; border: 1px solid #d9d9d9; border-left: 5px solid #222; background: #f7f7f7; border-radius: 4px;">',
         '<div style="font-weight: 700; font-size: 1.05em;">Instructions: Please rate your familiarity with each word on a scale from &lsquo;Not At All Familiar&rsquo; to &lsquo;Very Familiar.&rsquo;</div>',
+        '</div>'
+    ].join('');
+
+    var itemValidationMeaningInstructionsHtml = [
+        '<div style="margin: 0 0 18px; padding: 14px 16px; border: 1px solid #d9d9d9; border-left: 5px solid #222; background: #f7f7f7; border-radius: 4px;">',
+        '<div style="font-weight: 700; font-size: 1.05em;">Instructions: Please select the best meaning of each word listed below.</div>',
         '</div>'
     ].join('');
 
@@ -291,6 +468,78 @@ define(['questAPI'], function(Quest){
         stem: questionStem('Slacker')
     });
 
+    API.addQuestionsSet('meaningSuccessful',{
+        inherit: 'meaningSuccessfulScale',
+        name: 'item_validation_meaning_successful',
+        stem: itemValidationMeaningInstructionsHtml + questionStem('Successful')
+    });
+
+    API.addQuestionsSet('meaningRebellious',{
+        inherit: 'meaningRebelliousScale',
+        name: 'item_validation_meaning_rebellious',
+        stem: questionStem('Rebellious')
+    });
+
+    API.addQuestionsSet('meaningHardWorking',{
+        inherit: 'meaningHardWorkingScale',
+        name: 'item_validation_meaning_hard_working',
+        stem: questionStem('Hard-working')
+    });
+
+    API.addQuestionsSet('meaningLazy',{
+        inherit: 'meaningLazyScale',
+        name: 'item_validation_meaning_lazy',
+        stem: questionStem('Lazy')
+    });
+
+    API.addQuestionsSet('meaningIntelligent',{
+        inherit: 'meaningIntelligentScale',
+        name: 'item_validation_meaning_intelligent',
+        stem: questionStem('Intelligent')
+    });
+
+    API.addQuestionsSet('meaningStudious',{
+        inherit: 'meaningStudiousScale',
+        name: 'item_validation_meaning_studious',
+        stem: questionStem('Studious')
+    });
+
+    API.addQuestionsSet('meaningDistracted',{
+        inherit: 'meaningDistractedScale',
+        name: 'item_validation_meaning_distracted',
+        stem: questionStem('Distracted')
+    });
+
+    API.addQuestionsSet('meaningFocused',{
+        inherit: 'meaningFocusedScale',
+        name: 'item_validation_meaning_focused',
+        stem: questionStem('Focused')
+    });
+
+    API.addQuestionsSet('meaningIrresponsible',{
+        inherit: 'meaningIrresponsibleScale',
+        name: 'item_validation_meaning_irresponsible',
+        stem: questionStem('Irresponsible')
+    });
+
+    API.addQuestionsSet('meaningDisengaged',{
+        inherit: 'meaningDisengagedScale',
+        name: 'item_validation_meaning_disengaged',
+        stem: questionStem('Disengaged')
+    });
+
+    API.addQuestionsSet('meaningSmart',{
+        inherit: 'meaningSmartScale',
+        name: 'item_validation_meaning_smart',
+        stem: questionStem('Smart')
+    });
+
+    API.addQuestionsSet('meaningSlacker',{
+        inherit: 'meaningSlackerScale',
+        name: 'item_validation_meaning_slacker',
+        stem: questionStem('Slacker')
+    });
+
     API.addSequence([{
         inherit: 'itemValidationPage',
         questions: [
@@ -306,6 +555,23 @@ define(['questAPI'], function(Quest){
             {inherit: 'disengaged'},
             {inherit: 'smart'},
             {inherit: 'slacker'}
+        ]
+    },
+    {
+        inherit: 'itemValidationPage',
+        questions: [
+            {inherit: 'meaningSuccessful'},
+            {inherit: 'meaningRebellious'},
+            {inherit: 'meaningHardWorking'},
+            {inherit: 'meaningLazy'},
+            {inherit: 'meaningIntelligent'},
+            {inherit: 'meaningStudious'},
+            {inherit: 'meaningDistracted'},
+            {inherit: 'meaningFocused'},
+            {inherit: 'meaningIrresponsible'},
+            {inherit: 'meaningDisengaged'},
+            {inherit: 'meaningSmart'},
+            {inherit: 'meaningSlacker'}
         ]
     }]);
 
