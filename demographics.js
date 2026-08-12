@@ -400,6 +400,19 @@ define(['questAPI'], function(Quest){
             Array.prototype.forEach.call(dateInputs, applyBounds);
         }
 
+        function setAgeByteLimit(){
+            var stem = findStemElement('What is your age? (years)');
+            var container = stem ? findQuestionContainer(stem) : null;
+            if (!container) return;
+
+            var ageInputs = container.querySelectorAll('input:not([type="hidden"])');
+            Array.prototype.forEach.call(ageInputs, function(input){
+                input.setAttribute('type', 'text');
+                input.setAttribute('inputmode', 'numeric');
+                input.setAttribute('maxlength', '2');
+            });
+        }
+
         var inlineOtherMaxLength = 80;
         var inlineOtherAllowedPattern = /[^A-Za-z .'\-\/]/g;
         var inlineOtherPatternText = 'Letters, spaces, hyphens, apostrophes, periods, and slashes only.';
@@ -516,6 +529,7 @@ define(['questAPI'], function(Quest){
 
             items.forEach(moveInput);
             setDateOfBirthBounds();
+            setAgeByteLimit();
             markQuestionStems();
             markChoiceOptions();
             watchSelectedSingleChoiceOptions();
@@ -726,12 +740,12 @@ define(['questAPI'], function(Quest){
 	     stem: 'What is your age? (years)',
         inputType: 'number',
         min: 1,
-        max: 120,
+        max: 99,
         step: 1,
-        pattern: '^[0-9]+$',
+        pattern: '^[1-9][0-9]?$',
         errorMsg: {
             required: 'This question is required.',
-            pattern: 'Please enter your age as a whole number.'
+            pattern: 'Please enter a whole number from 1 to 99.'
         }
     });
 
