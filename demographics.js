@@ -38,6 +38,7 @@ define(['questAPI'], function(Quest){
                 '.demographics-question-stem::before, .demographics-question-stem::after { content: none !important; }',
                 '.demographics-question-stem.demographics-required-stem::before { content: "*" !important; display: inline-block; margin-right: 6px; color: #c9302c; font-weight: 700; }',
                 '[piq-page] .glyphicon-warning-sign, [piq-page] .glyphicon-exclamation-sign, [piq-page] .text-danger::before, [piq-page] .alert-danger::before, [piq-page] .help-block::before { content: none !important; display: none !important; }',
+                '.demographics-dob-error { margin-top: 10px; }',
                 '.demographics-scroll-target { outline: 2px solid rgba(201, 48, 44, 0.35); outline-offset: 4px; }',
                 '.inline-other-hidden-question { display: none !important; }',
                 '@media (max-width: 600px) { .inline-other-answer { display: flex; margin: 8px 0 0; } .inline-other-answer input, .inline-other-answer textarea { width: 100%; } }'
@@ -196,6 +197,59 @@ define(['questAPI'], function(Quest){
             return null;
         }
 
+        function isDateOfBirthField(field){
+            var attrs = [
+                field.getAttribute('name'),
+                field.getAttribute('id'),
+                field.getAttribute('ng-model'),
+                field.getAttribute('data-ng-model')
+            ].join(' ');
+
+            if (attrs.indexOf('date_of_birth') !== -1) return true;
+
+            var stem = findStemElement('Please enter your date of birth.');
+            var container = stem ? findQuestionContainer(stem) : null;
+            return !!(container && container.contains(field));
+        }
+
+        function dateOfBirthValid(value){
+            value = (value || '').trim();
+            return /^\d{4}-\d{2}-\d{2}$/.test(value) && value >= '1950-01-01' && value <= todayISO();
+        }
+
+        function clearDateOfBirthError(field){
+            var container = field ? findQuestionContainer(field) : null;
+            if (!container) return;
+
+            var errors = container.querySelectorAll('.demographics-dob-error');
+            Array.prototype.forEach.call(errors, function(error){
+                error.parentNode.removeChild(error);
+            });
+        }
+
+        function showDateOfBirthError(field){
+            var container = field ? findQuestionContainer(field) : null;
+            if (!container) return;
+
+            clearDateOfBirthError(field);
+
+            var error = document.createElement('div');
+            error.className = 'alert alert-danger demographics-dob-error';
+            error.textContent = 'Please enter a valid date.';
+            container.appendChild(error);
+        }
+
+        function setDateOfBirthValidity(field){
+            if (!isDateOfBirthField(field)) return true;
+
+            var valid = !field.value || dateOfBirthValid(field.value);
+            if (field.setCustomValidity){
+                field.setCustomValidity('');
+            }
+            if (valid) clearDateOfBirthError(field);
+            return valid;
+        }
+
         function questionAnswered(container){
             if (!container) return true;
 
@@ -206,6 +260,10 @@ define(['questAPI'], function(Quest){
 
             var fields = container.querySelectorAll('input:not([type="hidden"]), textarea, select');
             for (var j = 0; j < fields.length; j++){
+                if (isDateOfBirthField(fields[j])) {
+                    if (dateOfBirthValid(fields[j].value)) return true;
+                    continue;
+                }
                 if ((fields[j].value || '').trim() !== '') return true;
             }
 
@@ -228,7 +286,7 @@ define(['questAPI'], function(Quest){
             var candidates = document.querySelectorAll('[piq-page] .has-error, [piq-page] .text-danger, [piq-page] .alert-danger, [piq-page] .error, [piq-page] [class*="error"]');
             for (var i = 0; i < candidates.length; i++){
                 var text = cleanText(candidates[i]).toLowerCase();
-                if (visible(candidates[i]) && (text.indexOf('answer') !== -1 || text.indexOf('select') !== -1 || text.indexOf('enter') !== -1 || text.indexOf('required') !== -1)){
+                if (visible(candidates[i]) && (text.indexOf('answer') !== -1 || text.indexOf('select') !== -1 || text.indexOf('enter') !== -1 || text.indexOf('required') !== -1 || text.indexOf('valid') !== -1)){
                     return findQuestionContainer(candidates[i]);
                 }
             }
@@ -293,7 +351,22 @@ define(['questAPI'], function(Quest){
                 var text = cleanText(submit).toLowerCase();
                 if (action.indexOf('submit') === -1 && text !== 'submit') return;
 
-                if (!firstManualIncompleteQuestion() && screeningFailed()){
+                var firstIncomplete = firstManualIncompleteQuestion();
+                var firstIncompleteContainer = firstIncomplete ? findQuestionContainer(firstIncomplete) : null;
+                var firstIncompleteField = firstIncompleteContainer ? firstIncompleteContainer.querySelector('input:not([type="hidden"]), textarea, select') : null;
+                if (firstIncompleteField && isDateOfBirthField(firstIncompleteField) && firstIncompleteField.value && !setDateOfBirthValidity(firstIncompleteField)){
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    showDateOfBirthError(firstIncompleteField);
+                    scrollToElement(firstIncomplete);
+                    setTimeout(function(){
+                        firstIncompleteField.focus();
+                    }, 100);
+                    return;
+                }
+
+                if (!firstIncomplete && screeningFailed()){
                     event.preventDefault();
                     event.stopPropagation();
                     event.stopImmediatePropagation();
@@ -376,6 +449,17 @@ define(['questAPI'], function(Quest){
                 input.setAttribute('type', 'date');
                 input.setAttribute('min', '1950-01-01');
                 input.setAttribute('max', todayISO());
+                input.setAttribute('title', 'Please enter a valid date.');
+
+                if (!input.getAttribute('data-date-of-birth-validation')){
+                    input.setAttribute('data-date-of-birth-validation', 'true');
+                    input.addEventListener('input', function(){
+                        if (!input.value || dateOfBirthValid(input.value)) clearDateOfBirthError(input);
+                    });
+                    input.addEventListener('change', function(){
+                        if (!input.value || dateOfBirthValid(input.value)) clearDateOfBirthError(input);
+                    });
+                }
             }
 
             var inputs = document.querySelectorAll('[piq-page] input');
