@@ -400,6 +400,14 @@ define(['questAPI'], function(Quest){
             Array.prototype.forEach.call(dateInputs, applyBounds);
         }
 
+        var inlineOtherMaxLength = 80;
+        var inlineOtherAllowedPattern = /[^A-Za-z .'\-\/]/g;
+        var inlineOtherPatternText = 'Letters, spaces, hyphens, apostrophes, periods, and slashes only.';
+
+        function sanitizeInlineOtherValue(value){
+            return (value || '').replace(inlineOtherAllowedPattern, '').slice(0, inlineOtherMaxLength);
+        }
+
         function moveInput(item){
             var input = findInput(item);
             if (!input || input.getAttribute('data-inline-other')) return;
@@ -416,6 +424,9 @@ define(['questAPI'], function(Quest){
             option.appendChild(inline);
             option.classList.add('inline-other-option');
             input.setAttribute('data-inline-other', 'true');
+            input.setAttribute('maxlength', String(inlineOtherMaxLength));
+            input.setAttribute('pattern', "[A-Za-z .\\-'\\/]+");
+            input.setAttribute('title', inlineOtherPatternText);
 
             if (inputQuestion) inputQuestion.classList.add('inline-other-hidden-question');
             hideExactStemLabel(item);
@@ -451,6 +462,20 @@ define(['questAPI'], function(Quest){
                 setTimeout(function(){ input.focus(); }, 0);
             }
 
+            function sanitizeInput(){
+                var value = input.value || '';
+                var cursor = typeof input.selectionStart === 'number' ? input.selectionStart : value.length;
+                var sanitized = sanitizeInlineOtherValue(value);
+                if (value === sanitized) return;
+
+                var beforeCursor = sanitizeInlineOtherValue(value.slice(0, cursor));
+                input.value = sanitized;
+                if (input.setSelectionRange){
+                    input.setSelectionRange(beforeCursor.length, beforeCursor.length);
+                }
+                input.dispatchEvent(new Event('change', {bubbles: true}));
+            }
+
             // Focusing or typing in the field must not repeatedly toggle the owning option.
             input.addEventListener('mousedown', function(event){
                 event.stopPropagation();
@@ -465,6 +490,7 @@ define(['questAPI'], function(Quest){
                 event.stopPropagation();
                 selectInlineOption();
             });
+            input.addEventListener('input', sanitizeInput);
             input.addEventListener('keydown', function(event){ event.stopPropagation(); });
             option.addEventListener('click', function(event){
                 if (event.target.closest('.inline-other-answer input, .inline-other-answer textarea')) return;
