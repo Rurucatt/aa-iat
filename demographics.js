@@ -38,7 +38,7 @@ define(['questAPI'], function(Quest){
                 '.demographics-question-stem::before, .demographics-question-stem::after { content: none !important; }',
                 '.demographics-question-stem.demographics-required-stem::before { content: "*" !important; display: inline-block; margin-right: 6px; color: #c9302c; font-weight: 700; }',
                 '[piq-page] .glyphicon-warning-sign, [piq-page] .glyphicon-exclamation-sign, [piq-page] .text-danger::before, [piq-page] .alert-danger::before, [piq-page] .help-block::before { content: none !important; display: none !important; }',
-                '.demographics-dob-error { margin-top: 10px; }',
+                '.demographics-field-error { margin-top: 10px; }',
                 '.demographics-scroll-target { outline: 2px solid rgba(201, 48, 44, 0.35); outline-offset: 4px; }',
                 '.inline-other-hidden-question { display: none !important; }',
                 '@media (max-width: 600px) { .inline-other-answer { display: flex; margin: 8px 0 0; } .inline-other-answer input, .inline-other-answer textarea { width: 100%; } }'
@@ -212,31 +212,88 @@ define(['questAPI'], function(Quest){
             return !!(container && container.contains(field));
         }
 
+        function isAgeField(field){
+            var attrs = [
+                field.getAttribute('name'),
+                field.getAttribute('id'),
+                field.getAttribute('ng-model'),
+                field.getAttribute('data-ng-model')
+            ].join(' ');
+
+            if (attrs.indexOf('age') !== -1) return true;
+
+            var stem = findStemElement('What is your age? (years)');
+            var container = stem ? findQuestionContainer(stem) : null;
+            return !!(container && container.contains(field));
+        }
+
         function dateOfBirthValid(value){
             value = (value || '').trim();
             return /^\d{4}-\d{2}-\d{2}$/.test(value) && value >= '1950-01-01' && value <= todayISO();
         }
 
-        function clearDateOfBirthError(field){
+        function ageValid(value){
+            value = (value || '').trim();
+            if (!/^\d{1,2}$/.test(value)) return false;
+
+            var age = parseInt(value, 10);
+            return age >= 1 && age <= 99;
+        }
+
+        function getFieldByStem(stemText){
+            var stem = findStemElement(stemText);
+            var container = stem ? findQuestionContainer(stem) : null;
+            if (!container) return null;
+
+            return container.querySelector('input:not([type="hidden"]), textarea, select');
+        }
+
+        function clearFieldError(field, className){
             var container = field ? findQuestionContainer(field) : null;
             if (!container) return;
 
-            var errors = container.querySelectorAll('.demographics-dob-error');
+            var errors = container.querySelectorAll(className);
             Array.prototype.forEach.call(errors, function(error){
                 error.parentNode.removeChild(error);
             });
         }
 
-        function showDateOfBirthError(field){
+        function showFieldError(field, className, message){
             var container = field ? findQuestionContainer(field) : null;
             if (!container) return;
 
-            clearDateOfBirthError(field);
+            clearFieldError(field, className);
 
             var error = document.createElement('div');
-            error.className = 'alert alert-danger demographics-dob-error';
-            error.textContent = 'Please enter a valid date.';
+            error.className = 'alert alert-danger demographics-field-error ' + className.replace('.', '');
+            error.textContent = message;
             container.appendChild(error);
+        }
+
+        function clearDateOfBirthError(field){
+            clearFieldError(field, '.demographics-dob-error');
+        }
+
+        function showDateOfBirthError(field){
+            showFieldError(field, '.demographics-dob-error', 'Please enter a valid date.');
+        }
+
+        function clearAgeError(field){
+            clearFieldError(field, '.demographics-age-error');
+        }
+
+        function showAgeError(field){
+            showFieldError(field, '.demographics-age-error', 'Please enter a whole number from 1 to 99.');
+        }
+
+        function clearAgeConsistencyError(){
+            var ageField = getFieldByStem('What is your age? (years)');
+            clearFieldError(ageField, '.demographics-age-match-error');
+        }
+
+        function showAgeConsistencyError(){
+            var ageField = getFieldByStem('What is your age? (years)');
+            showFieldError(ageField, '.demographics-age-match-error', 'Please check that your date of birth and age match.');
         }
 
         function setDateOfBirthValidity(field){
@@ -248,6 +305,53 @@ define(['questAPI'], function(Quest){
             }
             if (valid) clearDateOfBirthError(field);
             return valid;
+        }
+
+        function setAgeValidity(field){
+            if (!isAgeField(field)) return true;
+
+            var valid = !field.value || ageValid(field.value);
+            if (field.setCustomValidity){
+                field.setCustomValidity('');
+            }
+            if (valid) clearAgeError(field);
+            return valid;
+        }
+
+        function calculateAgeFromDateOfBirth(dateOfBirth){
+            var parts = (dateOfBirth || '').split('-');
+            if (parts.length !== 3) return null;
+
+            var birthYear = parseInt(parts[0], 10);
+            var birthMonth = parseInt(parts[1], 10) - 1;
+            var birthDay = parseInt(parts[2], 10);
+            var today = new Date();
+            var age = today.getFullYear() - birthYear;
+
+            if (today.getMonth() < birthMonth || (today.getMonth() === birthMonth && today.getDate() < birthDay)){
+                age -= 1;
+            }
+
+            return age;
+        }
+
+        function dateOfBirthAgeOutOfRange(){
+            var dobField = getFieldByStem('Please enter your date of birth.');
+            if (!dobField || !dateOfBirthValid(dobField.value)) return false;
+
+            var age = calculateAgeFromDateOfBirth(dobField.value);
+            return age === null || age < 18 || age > 65;
+        }
+
+        function dateOfBirthAndAgeMismatch(){
+            var dobField = getFieldByStem('Please enter your date of birth.');
+            var ageField = getFieldByStem('What is your age? (years)');
+            if (!dobField || !ageField) return false;
+            if (!dateOfBirthValid(dobField.value) || !ageValid(ageField.value)) return false;
+
+            var dateOfBirthAge = calculateAgeFromDateOfBirth(dobField.value);
+            var enteredAge = parseInt(ageField.value, 10);
+            return dateOfBirthAge === null || Math.abs(dateOfBirthAge - enteredAge) > 1;
         }
 
         function questionAnswered(container){
@@ -262,6 +366,10 @@ define(['questAPI'], function(Quest){
             for (var j = 0; j < fields.length; j++){
                 if (isDateOfBirthField(fields[j])) {
                     if (dateOfBirthValid(fields[j].value)) return true;
+                    continue;
+                }
+                if (isAgeField(fields[j])) {
+                    if (ageValid(fields[j].value)) return true;
                     continue;
                 }
                 if ((fields[j].value || '').trim() !== '') return true;
@@ -336,7 +444,7 @@ define(['questAPI'], function(Quest){
         }
 
         function screeningFailed(){
-            return optionSelectedByText('No') || stateOtherSelected();
+            return optionSelectedByText('No') || stateOtherSelected() || dateOfBirthAgeOutOfRange();
         }
 
         function watchSubmitForIncompleteQuestions(){
@@ -363,6 +471,26 @@ define(['questAPI'], function(Quest){
                     setTimeout(function(){
                         firstIncompleteField.focus();
                     }, 100);
+                    return;
+                }
+                if (firstIncompleteField && isAgeField(firstIncompleteField) && firstIncompleteField.value && !setAgeValidity(firstIncompleteField)){
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    showAgeError(firstIncompleteField);
+                    scrollToElement(firstIncomplete);
+                    setTimeout(function(){
+                        firstIncompleteField.focus();
+                    }, 100);
+                    return;
+                }
+
+                if (!firstIncomplete && dateOfBirthAndAgeMismatch()){
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    showAgeConsistencyError();
+                    scrollToElement(getFieldByStem('What is your age? (years)'));
                     return;
                 }
 
@@ -455,9 +583,11 @@ define(['questAPI'], function(Quest){
                     input.setAttribute('data-date-of-birth-validation', 'true');
                     input.addEventListener('input', function(){
                         if (!input.value || dateOfBirthValid(input.value)) clearDateOfBirthError(input);
+                        clearAgeConsistencyError();
                     });
                     input.addEventListener('change', function(){
                         if (!input.value || dateOfBirthValid(input.value)) clearDateOfBirthError(input);
+                        clearAgeConsistencyError();
                     });
                 }
             }
@@ -494,6 +624,17 @@ define(['questAPI'], function(Quest){
                 input.setAttribute('type', 'text');
                 input.setAttribute('inputmode', 'numeric');
                 input.setAttribute('maxlength', '2');
+                if (!input.getAttribute('data-age-validation')){
+                    input.setAttribute('data-age-validation', 'true');
+                    input.addEventListener('input', function(){
+                        if (!input.value || ageValid(input.value)) clearAgeError(input);
+                        clearAgeConsistencyError();
+                    });
+                    input.addEventListener('change', function(){
+                        if (!input.value || ageValid(input.value)) clearAgeError(input);
+                        clearAgeConsistencyError();
+                    });
+                }
             });
         }
 
