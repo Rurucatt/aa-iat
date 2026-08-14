@@ -208,7 +208,7 @@ define(['questAPI'], function(Quest){
     API.addPagesSet('im4Page',{
         inherit: 'basicPage',
         autoFocus: false,
-        header: '<span class="im4-header-title">Internalization of the Model Minority Myth Measure (IM-4)</span><span class="im4-header-citation">(Yoo, Burrola, &amp; Steger, 2010)</span>'
+        header: 'Questionnaire'
     });
 
     API.addQuestionsSet('basicQ',{

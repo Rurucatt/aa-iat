@@ -232,7 +232,7 @@ define(['questAPI'], function(Quest){
     API.addPagesSet('itemValidationPage',{
         inherit: 'basicPage',
         autoFocus: false,
-        header: 'Item Validation Questions'
+        header: 'Questionnaire'
     });
 
     API.addQuestionsSet('basicQ',{
