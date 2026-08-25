@@ -403,7 +403,8 @@ define(['questAPI'], function(Quest){
         }
 
         function scrollToFirstIncompleteQuestion(){
-            var target = firstValidationError() || firstManualIncompleteQuestion();
+            var issue = firstIncompleteIssue();
+            var target = firstValidationError() || (issue ? issue.element : null);
             scrollToElement(target);
         }
 
@@ -420,6 +421,70 @@ define(['questAPI'], function(Quest){
                 optionText: 'I study in a state that is not listed above (specify)'
             });
             return !!(option && selected(option));
+        }
+
+        function itemForInputStem(stem){
+            for (var i = 0; i < items.length; i++){
+                if (items[i].inputStem === stem) return items[i];
+            }
+            return null;
+        }
+
+        function inlineOtherRequired(item){
+            var option = findOption(item);
+            return !!(option && selected(option));
+        }
+
+        function findInlineOtherInput(item){
+            var option = findOption(item);
+            var input = option ? option.querySelector('.inline-other-answer input, .inline-other-answer textarea') : null;
+            return input || findInput(item);
+        }
+
+        function inlineOtherAnswered(item){
+            var input = findInlineOtherInput(item);
+            return !!(input && (input.value || '').trim() !== '');
+        }
+
+        function firstIncompleteIssue(){
+            for (var i = 0; i < questionStems.length; i++){
+                var item = itemForInputStem(questionStems[i]);
+                if (item){
+                    if (inlineOtherRequired(item) && !inlineOtherAnswered(item)){
+                        var input = findInlineOtherInput(item);
+                        return {
+                            type: 'inlineOther',
+                            element: findOption(item) || input,
+                            field: input
+                        };
+                    }
+                    continue;
+                }
+
+                if (!textIsOneOf(questionStems[i], requiredQuestionStems)) continue;
+
+                var stemElement = findStemElement(questionStems[i]);
+                if (!stemElement) continue;
+
+                var container = findQuestionContainer(stemElement);
+                if (!questionAnswered(container)){
+                    return {
+                        type: 'required',
+                        element: stemElement,
+                        field: container ? container.querySelector('input:not([type="hidden"]), textarea, select') : null
+                    };
+                }
+            }
+
+            return null;
+        }
+
+        function clearInlineOtherError(field){
+            clearFieldError(field, '.demographics-other-error');
+        }
+
+        function showInlineOtherError(field){
+            showFieldError(field, '.demographics-other-error', 'This question is required.');
         }
 
         function showScreenOutPage(){
@@ -459,9 +524,20 @@ define(['questAPI'], function(Quest){
                 var text = cleanText(submit).toLowerCase();
                 if (action.indexOf('submit') === -1 && text !== 'submit') return;
 
-                var firstIncomplete = firstManualIncompleteQuestion();
-                var firstIncompleteContainer = firstIncomplete ? findQuestionContainer(firstIncomplete) : null;
-                var firstIncompleteField = firstIncompleteContainer ? firstIncompleteContainer.querySelector('input:not([type="hidden"]), textarea, select') : null;
+                var firstIssue = firstIncompleteIssue();
+                var firstIncomplete = firstIssue ? firstIssue.element : null;
+                var firstIncompleteField = firstIssue ? firstIssue.field : null;
+                if (firstIssue && firstIssue.type === 'inlineOther'){
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    showInlineOtherError(firstIncompleteField);
+                    scrollToElement(firstIncomplete);
+                    setTimeout(function(){
+                        if (firstIncompleteField) firstIncompleteField.focus();
+                    }, 100);
+                    return;
+                }
                 if (firstIncompleteField && isDateOfBirthField(firstIncompleteField) && firstIncompleteField.value && !setDateOfBirthValidity(firstIncompleteField)){
                     event.preventDefault();
                     event.stopPropagation();
@@ -546,7 +622,8 @@ define(['questAPI'], function(Quest){
                 field.getAttribute('name'),
                 field.getAttribute('id'),
                 field.getAttribute('ng-model'),
-                field.getAttribute('data-ng-model')
+                field.getAttribute('data-ng-model'),
+                field.getAttribute('data-inline-other-name')
             ].join(' ');
             return attrs.indexOf(inputName) !== -1;
         }
@@ -662,6 +739,7 @@ define(['questAPI'], function(Quest){
             option.appendChild(inline);
             option.classList.add('inline-other-option');
             input.setAttribute('data-inline-other', 'true');
+            input.setAttribute('data-inline-other-name', item.inputName);
             input.setAttribute('maxlength', String(inlineOtherMaxLength));
             input.setAttribute('pattern', "[A-Za-z .\\-'\\/]+");
             input.setAttribute('title', inlineOtherPatternText);
@@ -677,12 +755,16 @@ define(['questAPI'], function(Quest){
                 input.value = '';
                 input.dispatchEvent(new Event('input', {bubbles: true}));
                 input.dispatchEvent(new Event('change', {bubbles: true}));
+                clearInlineOtherError(input);
             }
 
             function clearIfDeselected(){
                 setTimeout(function(){
                     inlineOptionSelected = selected(option);
-                    if (!inlineOptionSelected) clearInput();
+                    if (!inlineOptionSelected){
+                        clearInput();
+                        clearInlineOtherError(input);
+                    }
                 }, 0);
             }
 
@@ -704,7 +786,10 @@ define(['questAPI'], function(Quest){
                 var value = input.value || '';
                 var cursor = typeof input.selectionStart === 'number' ? input.selectionStart : value.length;
                 var sanitized = sanitizeInlineOtherValue(value);
-                if (value === sanitized) return;
+                if (value === sanitized) {
+                    if ((input.value || '').trim() !== '') clearInlineOtherError(input);
+                    return;
+                }
 
                 var beforeCursor = sanitizeInlineOtherValue(value.slice(0, cursor));
                 input.value = sanitized;
@@ -712,6 +797,7 @@ define(['questAPI'], function(Quest){
                     input.setSelectionRange(beforeCursor.length, beforeCursor.length);
                 }
                 input.dispatchEvent(new Event('change', {bubbles: true}));
+                if ((input.value || '').trim() !== '') clearInlineOtherError(input);
             }
 
             // Focusing or typing in the field must not repeatedly toggle the owning option.
@@ -736,7 +822,10 @@ define(['questAPI'], function(Quest){
                 if (optionIsMulti) inlineOptionSelected = !inlineOptionSelected;
                 else inlineOptionSelected = true;
 
-                if (!inlineOptionSelected) clearInput();
+                if (!inlineOptionSelected){
+                    clearInput();
+                    clearInlineOtherError(input);
+                }
                 if (inlineOptionSelected) setTimeout(function(){ input.focus(); }, 0);
             });
             document.addEventListener('click', clearIfDeselected, false);
