@@ -84,6 +84,44 @@ define(['managerAPI',
             header: 'Consent to Participate'
         }],
 
+        studydata: [{
+            type: 'post',
+            name: 'studydata',
+            path: [
+                'study_blurb_response',
+                'study_blurb_timestamp',
+                'consent_response',
+                'consent_timestamp'
+            ],
+            pre: function(){
+                var global = API.getGlobal();
+
+                function getSessionValue(key, fallback){
+                    if (typeof sessionStorage === 'undefined') return fallback || '';
+                    return sessionStorage.getItem(key) || fallback || '';
+                }
+
+                global.study_blurb_response = getSessionValue('screening_blurb_response');
+                global.study_blurb_timestamp = getSessionValue('screening_blurb_timestamp');
+                global.consent_response = getSessionValue('consent_response');
+                global.consent_timestamp = getSessionValue('consent_timestamp');
+            }
+        }],
+
+        consent_declined: [{
+            type: 'message',
+            name: 'consent_declined',
+            title: 'Thank You',
+            header: 'Thank You',
+            template: '<div></div>',
+            pre: function(){
+                setTimeout(function(){
+                    if (window.showStudyExitPage) window.showStudyExitPage();
+                }, 0);
+            },
+            last: true
+        }],
+
         item_validation: [{
             type: 'quest',
             name: 'item_validation',
@@ -176,6 +214,14 @@ define(['managerAPI',
         // {inherit: 'intro'},
         {inherit: 'demographics'},
         {inherit: 'consent'},
+        {inherit: 'studydata'},
+        {
+            mixer: 'branch',
+            conditions: {compare: 'global.consent_response', to: 'no'},
+            data: [
+                {inherit: 'consent_declined'}
+            ]
+        },
         {inherit: 'item_validation'},
         {
             // Force the instructions to precede the IAT.

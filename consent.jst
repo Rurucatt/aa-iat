@@ -195,14 +195,15 @@
                 pi-message-done
                 type="button"
                 class="btn btn-primary btn-lg"
-                onclick="sessionStorage.setItem('consent_response', 'agree');"
+                onclick="sessionStorage.setItem('consent_response', 'agree'); sessionStorage.setItem('consent_timestamp', new Date().toISOString());"
             >
                 I agree
             </button>
             <button
+                pi-message-done
                 type="button"
                 class="btn btn-default btn-lg"
-                onclick="sessionStorage.setItem('consent_response', 'no'); var container = document.querySelector('.container'); if (container) { container.style.display = 'none'; } var exitPage = document.getElementById('exit-page'); if (exitPage) { exitPage.hidden = false; } else { document.body.innerHTML = '<main class=&quot;exit-message&quot;><div class=&quot;panel panel-info&quot;><div class=&quot;panel-heading&quot;><h1 class=&quot;panel-title&quot;>Thank You</h1></div><div class=&quot;panel-body&quot;><p>Thank you for your time and interest in this study. You may now close this browser window.</p></div></div></main>'; } document.title = 'Thank You'; return false;"
+                onclick="sessionStorage.setItem('consent_response', 'no'); sessionStorage.setItem('consent_timestamp', new Date().toISOString());"
             >
                 I do not wish to proceed with the study
             </button>

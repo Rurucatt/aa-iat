@@ -76,6 +76,7 @@
         <script>
             (function () {
                 var responseKey = 'screening_blurb_response';
+                var responseTimestampKey = 'screening_blurb_timestamp';
                 var consentResponseKey = 'consent_response';
                 var demographicsScreeningKey = 'demographics_screening_response';
                 var form = document.getElementById('study-blurb-form');
@@ -137,6 +138,7 @@
                     event.preventDefault();
                     var answer = form.elements[responseKey].value;
                     sessionStorage.setItem(responseKey, answer);
+                    sessionStorage.setItem(responseTimestampKey, new Date().toISOString());
                     if (answer === 'yes') launchStudy();
                     else showExitPage();
                 });
