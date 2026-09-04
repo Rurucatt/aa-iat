@@ -84,6 +84,14 @@ define(['managerAPI',
             header: 'Consent to Participate'
         }],
 
+        invitation: [{
+            inherit: 'instructions',
+            name: 'invitation',
+            templateUrl: 'invitation.jst',
+            title: 'Study Invitation',
+            header: 'Study Invitation'
+        }],
+
         studydata: [{
             type: 'post',
             name: 'studydata',
@@ -213,6 +221,7 @@ define(['managerAPI',
         // Intro page is temporarily disabled.
         // {inherit: 'intro'},
         {inherit: 'demographics'},
+        {inherit: 'invitation'},
         {inherit: 'consent'},
         {inherit: 'studydata'},
         {
