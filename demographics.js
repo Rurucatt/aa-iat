@@ -1026,7 +1026,6 @@ define(['questAPI'], function(Quest){
             {text: 'New York', value: 'NY'},
             {text: 'Pennsylvania', value: 'PA'},
             {text: 'Rhode Island', value: 'RI'},
-            {text: 'Vermont', value: 'VT'},
             {text: 'I study in a state that is not listed above (specify)', value: 'other'}
         ]
     });
