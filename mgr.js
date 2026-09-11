@@ -76,6 +76,20 @@ define(['managerAPI',
             scriptUrl: 'demographics.js'
         }],
 
+        screening_ineligible: [{
+            type: 'message',
+            name: 'screening_ineligible',
+            title: 'Thank You',
+            header: 'Thank You',
+            template: '<div></div>',
+            pre: function(){
+                setTimeout(function(){
+                    if (window.showDemographicsScreenOutPage) window.showDemographicsScreenOutPage();
+                }, 0);
+            },
+            last: true
+        }],
+
         consent: [{
             inherit: 'instructions',
             name: 'consent',
@@ -221,6 +235,13 @@ define(['managerAPI',
         // Intro page is temporarily disabled.
         // {inherit: 'intro'},
         {inherit: 'demographics'},
+        {
+            mixer: 'branch',
+            conditions: {compare: 'global.screening_status', to: 'ineligible'},
+            data: [
+                {inherit: 'screening_ineligible'}
+            ]
+        },
         {inherit: 'invitation'},
         {inherit: 'consent'},
         {inherit: 'studydata'},

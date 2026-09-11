@@ -407,22 +407,55 @@ define(['questAPI'], function(Quest){
             var target = firstValidationError() || (issue ? issue.element : null);
             scrollToElement(target);
         }
+        function optionSelectedInQuestion(stem, text){
+            var stemElement = findStemElement(stem);
+            var container = stemElement ? findQuestionContainer(stemElement) : null;
+            if (!container) return false;
 
-        function optionSelectedByText(text){
-            var options = document.querySelectorAll('[piq-page] .demographics-choice-option');
+            var options = container.querySelectorAll('.demographics-choice-option');
             for (var i = 0; i < options.length; i++){
-                if (cleanText(options[i]) === text && selected(options[i])) return true;
+                var optionText = cleanText(options[i]);
+                if ((optionText === text || optionText.indexOf(text) === 0) && selected(options[i])) return true;
             }
             return false;
         }
 
         function stateOtherSelected(){
-            var option = findOption({
-                optionText: 'I study in a state that is not listed above (specify)'
-            });
-            return !!(option && selected(option));
+            return optionSelectedInQuestion(
+                'Please select the state in which you study.',
+                'I study in a state that is not listed above (specify)'
+            );
         }
 
+        function screeningReasons(){
+            var reasons = [];
+
+            if (optionSelectedInQuestion('Are you currently a student studying education?', 'No')){
+                reasons.push('not_current_education_student');
+            }
+            if (stateOtherSelected()){
+                reasons.push('state_not_listed');
+            }
+            if (dateOfBirthAgeOutOfRange()){
+                reasons.push('age_out_of_range');
+            }
+            if (optionSelectedInQuestion('Are you able to read and understand English?', 'No')){
+                reasons.push('cannot_read_understand_english');
+            }
+            if (optionSelectedInQuestion('Are you able to complete this study on a personal device with a keyboard?', 'No')){
+                reasons.push('no_keyboard_device');
+            }
+
+            return reasons;
+        }
+
+        function screeningResult(){
+            var reasons = screeningReasons();
+            return {
+                status: reasons.length ? 'ineligible' : 'eligible',
+                reason: reasons.length ? reasons.join(';') : 'none'
+            };
+        }
         function itemForInputStem(stem){
             for (var i = 0; i < items.length; i++){
                 if (items[i].inputStem === stem) return items[i];
@@ -509,7 +542,7 @@ define(['questAPI'], function(Quest){
         }
 
         function screeningFailed(){
-            return optionSelectedByText('No') || stateOtherSelected() || dateOfBirthAgeOutOfRange();
+            return screeningReasons().length > 0;
         }
 
         function watchSubmitForIncompleteQuestions(){
@@ -569,13 +602,8 @@ define(['questAPI'], function(Quest){
                     scrollToElement(getFieldByStem('What is your age? (years)'));
                     return;
                 }
-
-                if (!firstIncomplete && screeningFailed()){
-                    event.preventDefault();
-                    event.stopPropagation();
-                    event.stopImmediatePropagation();
-                    showScreenOutPage();
-                    return;
+                if (!firstIncomplete){
+                    setScreeningData();
                 }
 
                 setTimeout(scrollToFirstIncompleteQuestion, 100);
@@ -639,6 +667,21 @@ define(['questAPI'], function(Quest){
 
             return fallback;
         }
+
+        function setScreeningData(){
+            var result = screeningResult();
+            sessionStorage.setItem('demographics_screening_status', result.status);
+            sessionStorage.setItem('demographics_screening_reason', result.reason);
+
+            if (window.piGlobal){
+                window.piGlobal.screening_status = result.status;
+                window.piGlobal.screening_reason = result.reason;
+            }
+
+            return result;
+        }
+
+        window.setDemographicsScreeningData = setScreeningData;
 
         function hideExactStemLabel(item){
             var candidates = document.querySelectorAll('[piq-page] label, [piq-page] p, [piq-page] span, [piq-page] div');
@@ -927,6 +970,19 @@ define(['questAPI'], function(Quest){
 		},
         autoSubmit:'true',
         numericValues:'true',
+        onSubmit: function(log){
+            var result = window.setDemographicsScreeningData ? window.setDemographicsScreeningData() : null;
+            var status = result && result.status;
+            var reason = result && result.reason;
+
+            if (typeof sessionStorage !== 'undefined'){
+                status = status || sessionStorage.getItem('demographics_screening_status');
+                reason = reason || sessionStorage.getItem('demographics_screening_reason');
+            }
+
+            log.screening_status = status || 'unknown';
+            log.screening_reason = reason || 'unknown';
+        },
         help: '<%= pagesMeta.number < 3 %>',
         //helpText: 'Tip: For quick response, click to select your answer, and then click again to submit.'
     });
