@@ -79,12 +79,41 @@
                 var responseTimestampKey = 'screening_blurb_timestamp';
                 var consentResponseKey = 'consent_response';
                 var demographicsScreeningKey = 'demographics_screening_response';
+                var participantIdKey = 'iat_participant_id';
                 var form = document.getElementById('study-blurb-form');
                 var blurb = document.getElementById('study-blurb');
                 var exitPage = document.getElementById('exit-page');
                 var exitPageMessage = document.getElementById('exit-page-message');
                 var defaultExitMessage = 'Thank you for your time and interest in this study. You may now close this browser window.';
                 var screeningExitMessage = 'Thank you so much for taking part in our study! Unfortunately, you do not meet criteria for the study, but we thank you for your interest and your time.';
+
+                function createParticipantId() {
+                    if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (char) {
+                        var random = Math.random() * 16 | 0;
+                        var value = char === 'x' ? random : (random & 0x3 | 0x8);
+                        return value.toString(16);
+                    });
+                }
+
+                function getOrCreateParticipantId() {
+                    try {
+                        var existingId = localStorage.getItem(participantIdKey);
+                        if (existingId) return existingId;
+
+                        var newId = createParticipantId();
+                        localStorage.setItem(participantIdKey, newId);
+                        return newId;
+                    } catch (error) {
+                        return createParticipantId();
+                    }
+                }
+
+                var participantId = getOrCreateParticipantId();
+                window.iatParticipantId = participantId;
+                window.getIatParticipantId = function () {
+                    return participantId;
+                };
 
                 function showExitPage(message) {
                     blurb.hidden = true;

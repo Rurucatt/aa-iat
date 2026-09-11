@@ -1,6 +1,6 @@
 define(['managerAPI',
 		'https://cdn.jsdelivr.net/gh/minnojs/minno-datapipe@1.*/datapipe.min.js'], function(Manager){
-	
+
 	//You can use the commented-out code to get parameters from the URL.
 	//const queryString = window.location.search;
     //const urlParams = new URLSearchParams(queryString);
@@ -15,11 +15,42 @@ define(['managerAPI',
     API.setName('mgr');
     API.addSettings('skip',true);
 
+
+    function createParticipantId(){
+        if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(char){
+            var random = Math.random() * 16 | 0;
+            var value = char === 'x' ? random : (random & 0x3 | 0x8);
+            return value.toString(16);
+        });
+    }
+
+    function getOrCreateParticipantId(){
+        var key = 'iat_participant_id';
+
+        if (window.getIatParticipantId) return window.getIatParticipantId();
+
+        try {
+            var existingId = localStorage.getItem(key);
+            if (existingId) return existingId;
+
+            var newId = createParticipantId();
+            localStorage.setItem(key, newId);
+            return newId;
+        } catch (error) {
+            return createParticipantId();
+        }
+    }
+
+    var participantId = getOrCreateParticipantId();
+    window.iatParticipantId = participantId;
+    window.getIatParticipantId = function(){ return participantId; };
+
     //Randomly select which of two sets of category labels to use.
     let raceSet = API.shuffle(['a','b'])[0];
     let asianLabels = [];
     let whiteLabels = [];
-	
+
     if (raceSet == 'a') {
       asianLabels.push('Asian American');
       whiteLabels.push('White American');
@@ -27,22 +58,23 @@ define(['managerAPI',
     	asianLabels.push('Asian American');
         whiteLabels.push('White American');
     }
-	
+
 	//let asianLabels = ['Asian American'];
 	//let whiteLabels = ['White American'];
-	
+
     API.addGlobal({
+        participant_id: participantId,
         raceiat:{},
         //YBYB: change when copying back to the correct folder
         baseURL: './images/',
         raceSet:raceSet,
         asianLabels:asianLabels,
         whiteLabels:whiteLabels,
-        //Select randomly what attribute words to see. 
+        //Select randomly what attribute words to see.
         //Based on Axt, Feng, & Bar-Anan (2021).
         posWords : API.shuffle([
             'Successful', 'Hard-working', 'Intelligent', 'Studious', 'Focused', 'Smart'
-        ]), 
+        ]),
         negWords : API.shuffle([
             'Rebellious', 'Lazy', 'Distracted', 'Irresponsible', 'Disengaged', 'Slacker'
         ])
@@ -110,6 +142,7 @@ define(['managerAPI',
             type: 'post',
             name: 'studydata',
             path: [
+                'participant_id',
                 'study_blurb_response',
                 'study_blurb_timestamp',
                 'consent_response',
@@ -123,6 +156,7 @@ define(['managerAPI',
                     return sessionStorage.getItem(key) || fallback || '';
                 }
 
+                global.participant_id = participantId;
                 global.study_blurb_response = getSessionValue('screening_blurb_response');
                 global.study_blurb_timestamp = getSessionValue('screening_blurb_timestamp');
                 global.consent_response = getSessionValue('consent_response');
@@ -168,9 +202,9 @@ define(['managerAPI',
             templateUrl: 'lastpage.jst',
             title: 'End',
             //Uncomment the following if you want to end the study here.
-            //last:true, 
+            //last:true,
             header: 'You have completed the study'
-        }], 
+        }],
 
         debriefing: [{
             type: 'message',
@@ -179,22 +213,22 @@ define(['managerAPI',
             title: 'Deception Debriefing Form',
             header: 'Deception Debriefing Form'
         }],
-        
+
         //Use if you want to redirect the participants elsewhere at the end of the study
         redirect:
-        [{ 
+        [{
 			//Replace with any URL you need to put at the end of your study, or just remove this task from the sequence below
-            type:'redirect', name:'redirecting', url: 'https://www.google.com/search' 
+            type:'redirect', name:'redirecting', url: 'https://www.google.com/search'
         }],
-		
+
 		//This task waits until the data are sent to the server.
         uploading: uploading_task({header: 'just a moment', body:'Please wait, sending data... '})
     });
 
     API.addSequence([
-        { type: 'isTouch' }, //Use Minno's internal touch detection mechanism. 
-        
-        { type: 'post', path: ['$isTouch', 'raceSet', 'asianLabels', 'whiteLabels'] },
+        { type: 'isTouch' }, //Use Minno's internal touch detection mechanism.
+
+        { type: 'post', path: ['$isTouch', 'participant_id', 'raceSet', 'asianLabels', 'whiteLabels'] },
 
         // apply touch only styles
         {
@@ -230,8 +264,8 @@ define(['managerAPI',
                 }
             ]
         },
-        
-        
+
+
         // Intro page is temporarily disabled.
         // {inherit: 'intro'},
         {inherit: 'demographics'},

@@ -982,6 +982,7 @@ define(['questAPI'], function(Quest){
 
             log.screening_status = status || 'unknown';
             log.screening_reason = reason || 'unknown';
+            log.participant_id = window.getIatParticipantId ? window.getIatParticipantId() : (window.iatParticipantId || 'unknown');
         },
         help: '<%= pagesMeta.number < 3 %>',
         //helpText: 'Tip: For quick response, click to select your answer, and then click again to submit.'

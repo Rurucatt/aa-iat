@@ -100,6 +100,7 @@ define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
         base_url : {//Where are your images at?
             image : global.baseURL
         },
+        participant_id : global.participant_id,
         isTouch : global.$isTouch
     });
 });

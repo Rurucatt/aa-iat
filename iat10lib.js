@@ -345,6 +345,7 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
 		var att2 = piCurrent.attribute2;
 		var cat1 = piCurrent.category1;
 		var cat2 = piCurrent.category2;
+		var participantId = piCurrent.participant_id || (window.getIatParticipantId ? window.getIatParticipantId() : (window.iatParticipantId || 'unknown'));
 		if (isTouch)
 		{
 			var maxW = piCurrent.touchMaxStimulusWidth;
@@ -380,7 +381,7 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
 					var DScoreObj = scorer.computeD();
 					piCurrent.feedback = DScoreObj.FBMsg;
 					piCurrent.d = DScoreObj.DScore; //YBYB: Added on 28March2017
-					API.save({block3Cond:block3Cond, feedback:DScoreObj.FBMsg, d: DScoreObj.DScore});
+					API.save({block3Cond:block3Cond, feedback:DScoreObj.FBMsg, d: DScoreObj.DScore, participant_id: participantId});
 				}
 			});
 		/**
@@ -388,7 +389,7 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
 		 */
 		API.addTrialSets('sort',{
 			// by default each trial is correct, this is modified in case of an error
-			data: {score:0, parcel:'first'}, //We're using only one parcel for computing the score, so we're always going to call it 'first'.
+			data: {score:0, parcel:'first', participant_id: participantId}, //We're using only one parcel for computing the score, so we're always going to call it 'first'.
 			// set the interface for trials
 			input: [
 				{handle:'skip1',on:'keypressed', key:27}, //Esc + Enter will skip blocks

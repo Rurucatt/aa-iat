@@ -219,6 +219,9 @@ define(['questAPI'], function(Quest){
         },
         autoSubmit: 'true',
         numericValues: 'true',
+        onSubmit: function(log){
+            log.participant_id = window.getIatParticipantId ? window.getIatParticipantId() : (window.iatParticipantId || 'unknown');
+        },
         help: '<%= pagesMeta.number < 3 %>'
     });
 

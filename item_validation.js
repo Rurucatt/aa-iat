@@ -242,7 +242,10 @@ define(['questAPI'], function(Quest){
             required: 'This question is required.'
         },
         autoSubmit: 'true',
-        numericValues: 'true'
+        numericValues: 'true',
+        onSubmit: function(log){
+            log.participant_id = window.getIatParticipantId ? window.getIatParticipantId() : (window.iatParticipantId || 'unknown');
+        }
     });
 
     API.addQuestionsSet('basicSelect',{
