@@ -46,6 +46,22 @@ define(['managerAPI',
     window.iatParticipantId = participantId;
     window.getIatParticipantId = function(){ return participantId; };
 
+    var currentSectionKey = 'iat_current_section';
+
+    function getCurrentSection(){
+        try {
+            return localStorage.getItem(currentSectionKey) || 'demographics';
+        } catch (error) {
+            return 'demographics';
+        }
+    }
+
+    function rememberSection(section){
+        try {
+            localStorage.setItem(currentSectionKey, section);
+        } catch (error) {}
+    }
+
     //Randomly select which of two sets of category labels to use.
     let raceSet = API.shuffle(['a','b'])[0];
     let asianLabels = [];
@@ -99,13 +115,15 @@ define(['managerAPI',
             name: 'raceiat_instructions',
             templateUrl: 'raceiat_instructions.jst',
             title: 'IAT Instructions',
-            header: 'Implicit Association Test'
+            header: 'Implicit Association Test',
+            pre: function(){ rememberSection('raceiat'); }
         }],
 
         demographics: [{
             type: 'quest',
             name: 'demographics',
-            scriptUrl: 'demographics.js'
+            scriptUrl: 'demographics.js',
+            pre: function(){ rememberSection('demographics'); }
         }],
 
         screening_ineligible: [{
@@ -115,6 +133,7 @@ define(['managerAPI',
             header: 'Thank You',
             template: '<div></div>',
             pre: function(){
+                rememberSection('screening_ineligible');
                 setTimeout(function(){
                     if (window.showDemographicsScreenOutPage) window.showDemographicsScreenOutPage();
                 }, 0);
@@ -127,7 +146,8 @@ define(['managerAPI',
             name: 'consent',
             templateUrl: 'consent.jst',
             title: 'Consent',
-            header: 'Consent to Participate'
+            header: 'Consent to Participate',
+            pre: function(){ rememberSection('consent'); }
         }],
 
         invitation: [{
@@ -135,7 +155,8 @@ define(['managerAPI',
             name: 'invitation',
             templateUrl: 'invitation.jst',
             title: 'Study Invitation',
-            header: 'Study Invitation'
+            header: 'Study Invitation',
+            pre: function(){ rememberSection('invitation'); }
         }],
 
         studydata: [{
@@ -152,8 +173,10 @@ define(['managerAPI',
                 var global = API.getGlobal();
 
                 function getSessionValue(key, fallback){
-                    if (typeof sessionStorage === 'undefined') return fallback || '';
-                    return sessionStorage.getItem(key) || fallback || '';
+                    var value = '';
+                    if (typeof sessionStorage !== 'undefined') value = sessionStorage.getItem(key) || '';
+                    if (!value && typeof localStorage !== 'undefined') value = localStorage.getItem(key) || '';
+                    return value || fallback || '';
                 }
 
                 global.participant_id = participantId;
@@ -171,6 +194,7 @@ define(['managerAPI',
             header: 'Thank You',
             template: '<div></div>',
             pre: function(){
+                rememberSection('consent_declined');
                 setTimeout(function(){
                     if (window.showStudyExitPage) window.showStudyExitPage();
                 }, 0);
@@ -181,7 +205,8 @@ define(['managerAPI',
         item_validation: [{
             type: 'quest',
             name: 'item_validation',
-            scriptUrl: 'item_validation.js'
+            scriptUrl: 'item_validation.js',
+            pre: function(){ rememberSection('item_validation'); }
         }],
 
         raceiat: [{
@@ -193,7 +218,8 @@ define(['managerAPI',
         IM4: [{
             type: 'quest',
             name: 'IM4',
-            scriptUrl: 'im4.js'
+            scriptUrl: 'im4.js',
+            pre: function(){ rememberSection('IM4'); }
         }],
 
         lastpage: [{
@@ -211,7 +237,8 @@ define(['managerAPI',
             name: 'debriefing',
             templateUrl: 'debriefing.jst',
             title: 'Deception Debriefing Form',
-            header: 'Deception Debriefing Form'
+            header: 'Deception Debriefing Form',
+            pre: function(){ rememberSection('debriefing'); }
         }],
 
         //Use if you want to redirect the participants elsewhere at the end of the study
@@ -225,7 +252,7 @@ define(['managerAPI',
         uploading: uploading_task({header: 'just a moment', body:'Please wait, sending data... '})
     });
 
-    API.addSequence([
+    var sequence = [
         { type: 'isTouch' }, //Use Minno's internal touch detection mechanism.
 
         { type: 'post', path: ['$isTouch', 'participant_id', 'raceSet', 'asianLabels', 'whiteLabels'] },
@@ -266,41 +293,59 @@ define(['managerAPI',
         },
 
 
-        // Intro page is temporarily disabled.
-        // {inherit: 'intro'},
-        {inherit: 'demographics'},
-        {
-            mixer: 'branch',
-            conditions: {compare: 'global.screening_status', to: 'ineligible'},
-            data: [
-                {inherit: 'screening_ineligible'}
-            ]
-        },
-        {inherit: 'invitation'},
-        {inherit: 'consent'},
-        {inherit: 'studydata'},
-        {
-            mixer: 'branch',
-            conditions: {compare: 'global.consent_response', to: 'no'},
-            data: [
-                {inherit: 'consent_declined'}
-            ]
-        },
-        {inherit: 'item_validation'},
-        {
-            // Force the instructions to precede the IAT.
-            mixer: 'wrapper',
-            data: [
-                {inherit: 'raceiat_instructions'},
-                {inherit: 'raceiat'}
-            ]
-        },
-        {inherit: 'IM4'},
+    ];
 
-		{inherit: 'uploading'},
-        {inherit: 'debriefing'},
-        {inherit: 'redirect'}
-    ]);
+    var resumeOrder = ['demographics', 'invitation', 'consent', 'item_validation', 'raceiat', 'IM4', 'debriefing'];
+    var resumeSection = getCurrentSection();
+    var resumeIndex = resumeOrder.indexOf(resumeSection);
+    if (resumeIndex === -1) resumeIndex = 0;
+
+    function includeFrom(section){
+        return resumeIndex <= resumeOrder.indexOf(section);
+    }
+
+    if (resumeSection === 'screening_ineligible'){
+        sequence.push({inherit: 'screening_ineligible'});
+    } else if (resumeSection === 'consent_declined'){
+        sequence.push({inherit: 'consent_declined'});
+    } else {
+        if (includeFrom('demographics')){
+            sequence.push({inherit: 'demographics'});
+            sequence.push({
+                mixer: 'branch',
+                conditions: {compare: 'global.screening_status', to: 'ineligible'},
+                data: [{inherit: 'screening_ineligible'}]
+            });
+        }
+        if (includeFrom('invitation')) sequence.push({inherit: 'invitation'});
+        if (includeFrom('consent')){
+            sequence.push({inherit: 'consent'});
+            sequence.push({inherit: 'studydata'});
+            sequence.push({
+                mixer: 'branch',
+                conditions: {compare: 'global.consent_response', to: 'no'},
+                data: [{inherit: 'consent_declined'}]
+            });
+        }
+        if (includeFrom('item_validation')) sequence.push({inherit: 'item_validation'});
+        if (includeFrom('raceiat')){
+            sequence.push({
+                mixer: 'wrapper',
+                data: [
+                    {inherit: 'raceiat_instructions'},
+                    {inherit: 'raceiat'}
+                ]
+            });
+        }
+        if (includeFrom('IM4')) sequence.push({inherit: 'IM4'});
+        if (includeFrom('debriefing')){
+            sequence.push({inherit: 'uploading'});
+            sequence.push({inherit: 'debriefing'});
+            sequence.push({inherit: 'redirect'});
+        }
+    }
+
+    API.addSequence(sequence);
 
     return API.script;
 });

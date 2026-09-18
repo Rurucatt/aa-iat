@@ -126,6 +126,23 @@
                     }
                 }
 
+                function getCurrentSection() {
+                    try {
+                        return localStorage.getItem(currentSectionKey) || '';
+                    } catch (error) {
+                        return '';
+                    }
+                }
+
+                function restoreStoredBlurbData() {
+                    try {
+                        var storedResponse = localStorage.getItem(responseKey);
+                        var storedTimestamp = localStorage.getItem(responseTimestampKey);
+                        if (storedResponse) sessionStorage.setItem(responseKey, storedResponse);
+                        if (storedTimestamp) sessionStorage.setItem(responseTimestampKey, storedTimestamp);
+                    } catch (error) {}
+                }
+
                 function showExitPage(message) {
                     blurb.hidden = true;
                     if (exitPageMessage) exitPageMessage.textContent = message || defaultExitMessage;
@@ -166,6 +183,12 @@
                     return;
                 }
 
+                if (getCurrentSection()) {
+                    restoreStoredBlurbData();
+                    launchStudy();
+                    return;
+                }
+
                 if (
                     sessionStorage.getItem(responseKey) === 'no' ||
                     sessionStorage.getItem(consentResponseKey) === 'no' ||
@@ -182,9 +205,16 @@
                 form.addEventListener('submit', function (event) {
                     event.preventDefault();
                     var answer = form.elements[responseKey].value;
+                    var responseTimestamp = new Date().toISOString();
                     sessionStorage.setItem(responseKey, answer);
-                    sessionStorage.setItem(responseTimestampKey, new Date().toISOString());
-                    if (answer === 'yes') launchStudy();
+                    sessionStorage.setItem(responseTimestampKey, responseTimestamp);
+                    if (answer === 'yes') {
+                        try {
+                            localStorage.setItem(responseKey, answer);
+                            localStorage.setItem(responseTimestampKey, responseTimestamp);
+                        } catch (error) {}
+                        launchStudy();
+                    }
                     else showExitPage();
                 });
             }());
