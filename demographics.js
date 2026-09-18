@@ -81,7 +81,7 @@ define(['questAPI'], function(Quest){
             'Please enter your race.',
             'Please select your ethnicity.',
             'Are you able to read and understand English?',
-            'Are you able to complete this study on a personal device with a keyboard?'
+            'Do you have a device available to complete this study?'
         ];
 
         var raceOptionTexts = [
@@ -442,8 +442,8 @@ define(['questAPI'], function(Quest){
             if (optionSelectedInQuestion('Are you able to read and understand English?', 'No')){
                 reasons.push('cannot_read_understand_english');
             }
-            if (optionSelectedInQuestion('Are you able to complete this study on a personal device with a keyboard?', 'No')){
-                reasons.push('no_keyboard_device');
+            if (optionSelectedInQuestion('Do you have a device available to complete this study?', 'No')){
+                reasons.push('no_study_device');
             }
 
             return reasons;
@@ -1258,10 +1258,10 @@ define(['questAPI'], function(Quest){
         ]
     });
 
-    API.addQuestionsSet('keyboardDevice',{
+    API.addQuestionsSet('studyDeviceAccess',{
         inherit: 'demographicsSelect',
-        name: 'keyboard_device',
-        stem: 'Are you able to complete this study on a personal device with a keyboard?',
+        name: 'study_device_access',
+        stem: 'Do you have a device available to complete this study?',
         answers: [
             {text: 'Yes', value: 'yes'},
             {text: 'No', value: 'no'}
@@ -1288,7 +1288,7 @@ define(['questAPI'], function(Quest){
             {inherit: 'raceOther'},
             {inherit: 'ethnicity'},
             {inherit: 'englishComprehension'},
-            {inherit: 'keyboardDevice'}
+            {inherit: 'studyDeviceAccess'}
         ]
     }]);
 
