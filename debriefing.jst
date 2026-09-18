@@ -168,7 +168,7 @@
         </div>
 
         <div class="debriefing-actions">
-            <button pi-message-done type="button" class="btn btn-primary btn-lg">
+            <button pi-message-done type="button" class="btn btn-primary btn-lg" onclick="try { localStorage.setItem('iat_study_status', 'completed'); localStorage.setItem('iat_current_section', 'completed'); } catch (error) {}">
                 Finish
             </button>
         </div>

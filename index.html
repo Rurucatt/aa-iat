@@ -80,12 +80,15 @@
                 var consentResponseKey = 'consent_response';
                 var demographicsScreeningKey = 'demographics_screening_response';
                 var participantIdKey = 'iat_participant_id';
+                var studyStatusKey = 'iat_study_status';
+                var currentSectionKey = 'iat_current_section';
                 var form = document.getElementById('study-blurb-form');
                 var blurb = document.getElementById('study-blurb');
                 var exitPage = document.getElementById('exit-page');
                 var exitPageMessage = document.getElementById('exit-page-message');
                 var defaultExitMessage = 'Thank you for your time and interest in this study. You may now close this browser window.';
                 var screeningExitMessage = 'Thank you so much for taking part in our study! Unfortunately, you do not meet criteria for the study, but we thank you for your interest and your time.';
+                var alreadyCompletedMessage = 'Thank you. You have already completed this study.';
 
                 function createParticipantId() {
                     if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
@@ -114,6 +117,14 @@
                 window.getIatParticipantId = function () {
                     return participantId;
                 };
+
+                function getStudyStatus() {
+                    try {
+                        return localStorage.getItem(studyStatusKey) || '';
+                    } catch (error) {
+                        return '';
+                    }
+                }
 
                 function showExitPage(message) {
                     blurb.hidden = true;
@@ -148,6 +159,11 @@
                         minnoJS.onEnd = function () { setTimeout(proceed, 100); };
                     };
                     document.head.appendChild(scriptTag);
+                }
+
+                if (getStudyStatus() === 'completed') {
+                    showExitPage(alreadyCompletedMessage);
+                    return;
                 }
 
                 if (
