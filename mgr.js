@@ -116,7 +116,7 @@ define(['managerAPI',
             templateUrl: 'raceiat_instructions.jst',
             title: 'IAT Instructions',
             header: 'Implicit Association Test',
-            pre: function(){ rememberSection('raceiat'); }
+            pre: function(){ rememberSection('raceiat_instructions'); }
         }],
 
         demographics: [{
@@ -209,10 +209,17 @@ define(['managerAPI',
             pre: function(){ rememberSection('item_validation'); }
         }],
 
+        iat_restart: [{
+            type: 'quest',
+            name: 'iat_restart',
+            scriptUrl: 'iat_restart.js'
+        }],
+
         raceiat: [{
             type: 'time',
             name: 'raceiat',
-            scriptUrl: 'raceiat.js'
+            scriptUrl: 'raceiat.js',
+            pre: function(){ rememberSection('raceiat_active'); }
         }],
 
         IM4: [{
@@ -295,8 +302,9 @@ define(['managerAPI',
 
     ];
 
-    var resumeOrder = ['demographics', 'invitation', 'consent', 'item_validation', 'raceiat', 'IM4', 'debriefing'];
+    var resumeOrder = ['demographics', 'invitation', 'consent', 'item_validation', 'raceiat_instructions', 'raceiat_active', 'IM4', 'debriefing'];
     var resumeSection = getCurrentSection();
+    if (resumeSection === 'raceiat') resumeSection = 'raceiat_instructions';
     var resumeIndex = resumeOrder.indexOf(resumeSection);
     if (resumeIndex === -1) resumeIndex = 0;
 
@@ -328,7 +336,8 @@ define(['managerAPI',
             });
         }
         if (includeFrom('item_validation')) sequence.push({inherit: 'item_validation'});
-        if (includeFrom('raceiat')){
+        if (includeFrom('raceiat_active')){
+            if (resumeSection === 'raceiat_active') sequence.push({inherit: 'iat_restart'});
             sequence.push({
                 mixer: 'wrapper',
                 data: [
