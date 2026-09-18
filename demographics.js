@@ -81,7 +81,7 @@ define(['questAPI'], function(Quest){
             'Please enter your race.',
             'Please select your ethnicity.',
             'Are you able to read and understand English?',
-            'Do you have a device available to complete this study?'
+            'Do you have access to a device to complete this study?'
         ];
 
         var raceOptionTexts = [
@@ -442,7 +442,7 @@ define(['questAPI'], function(Quest){
             if (optionSelectedInQuestion('Are you able to read and understand English?', 'No')){
                 reasons.push('cannot_read_understand_english');
             }
-            if (optionSelectedInQuestion('Do you have a device available to complete this study?', 'No')){
+            if (optionSelectedInQuestion('Do you have access to a device to complete this study?', 'No')){
                 reasons.push('no_study_device');
             }
 
@@ -1261,7 +1261,7 @@ define(['questAPI'], function(Quest){
     API.addQuestionsSet('studyDeviceAccess',{
         inherit: 'demographicsSelect',
         name: 'study_device_access',
-        stem: 'Do you have a device available to complete this study?',
+        stem: 'Do you have access to a device to complete this study?',
         answers: [
             {text: 'Yes', value: 'yes'},
             {text: 'No', value: 'no'}
