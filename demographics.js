@@ -65,6 +65,8 @@ define(['questAPI'], function(Quest){
         ];
 
         var questionStems = [
+            'Please enter your name.',
+            'Please enter your email address. If you are eligible for and complete the study, this email will be used to enter you into the raffle for a $20 Amazon gift card.',
             'Are you currently a student studying education?',
             'Are you an undergraduate or graduate student?',
             'Please select your year of study.',
@@ -79,8 +81,7 @@ define(['questAPI'], function(Quest){
             'Please enter your race.',
             'Please select your ethnicity.',
             'Are you able to read and understand English?',
-            'Are you able to complete this study on a personal device with a keyboard?',
-            'If you are interested in being entered into the raffle to win a $20 Amazon gift card, please enter your email (Please note that you must be eligible for, and complete the study to be entered into the raffle to win the gift card):'
+            'Are you able to complete this study on a personal device with a keyboard?'
         ];
 
         var raceOptionTexts = [
@@ -95,8 +96,7 @@ define(['questAPI'], function(Quest){
         var optionalQuestionStems = [
             'Please enter the state in which you study.',
             'Please enter your gender identity.',
-            'Please enter your race.',
-            'If you are interested in being entered into the raffle to win a $20 Amazon gift card, please enter your email (Please note that you must be eligible for, and complete the study to be entered into the raffle to win the gift card):'
+            'Please enter your race.'
         ];
 
         var requiredQuestionStems = questionStems.filter(function(stem){
@@ -758,6 +758,47 @@ define(['questAPI'], function(Quest){
             });
         }
 
+        function setParticipantIdentityConstraints(){
+            var nameStem = findStemElement('Please enter your name.');
+            var nameContainer = nameStem ? findQuestionContainer(nameStem) : null;
+            if (nameContainer){
+                var nameInputs = nameContainer.querySelectorAll('input:not([type="hidden"]), textarea');
+                Array.prototype.forEach.call(nameInputs, function(input){
+                    input.setAttribute('maxlength', '100');
+                    input.setAttribute('pattern', "[A-Za-z .'-]+");
+                    input.setAttribute('title', "Use letters, spaces, hyphens, apostrophes, and periods only.");
+
+                    if (!input.getAttribute('data-participant-name-validation')){
+                        input.setAttribute('data-participant-name-validation', 'true');
+                        input.addEventListener('input', function(){
+                            var value = input.value || '';
+                            var cursor = typeof input.selectionStart === 'number' ? input.selectionStart : value.length;
+                            var sanitized = value.replace(/[^A-Za-z .'-]/g, '').slice(0, 100);
+                            if (value === sanitized) return;
+
+                            var beforeCursor = value.slice(0, cursor).replace(/[^A-Za-z .'-]/g, '').slice(0, 100);
+                            input.value = sanitized;
+                            if (input.setSelectionRange){
+                                input.setSelectionRange(beforeCursor.length, beforeCursor.length);
+                            }
+                            input.dispatchEvent(new Event('change', {bubbles: true}));
+                        });
+                    }
+                });
+            }
+
+            var emailStem = findStemElement('Please enter your email address. If you are eligible for and complete the study, this email will be used to enter you into the raffle for a $20 Amazon gift card.');
+            var emailContainer = emailStem ? findQuestionContainer(emailStem) : null;
+            if (emailContainer){
+                var emailInputs = emailContainer.querySelectorAll('input:not([type="hidden"])');
+                Array.prototype.forEach.call(emailInputs, function(input){
+                    input.setAttribute('type', 'email');
+                    input.setAttribute('maxlength', '254');
+                    input.setAttribute('title', 'Please enter a valid email address.');
+                });
+            }
+        }
+
         var inlineOtherMaxLength = 80;
         var inlineOtherAllowedPattern = /[^A-Za-z .'\-\/]/g;
         var inlineOtherPatternText = 'Letters, spaces, hyphens, apostrophes, periods, and slashes only.';
@@ -887,6 +928,7 @@ define(['questAPI'], function(Quest){
             items.forEach(moveInput);
             setDateOfBirthBounds();
             setAgeByteLimit();
+            setParticipantIdentityConstraints();
             markQuestionStems();
             markChoiceOptions();
             watchSelectedSingleChoiceOptions();
@@ -1037,7 +1079,31 @@ define(['questAPI'], function(Quest){
 
 	//API.addQuestionsSet('age',{
     //    inherit : 'basicText',
-       API.addQuestionsSet('educationStudent',{
+    API.addQuestionsSet('participantName',{
+        inherit: 'demographicsText',
+        name: 'name',
+        stem: 'Please enter your name.',
+        maxLength: 100,
+        pattern: "^[A-Za-z .'-]+$",
+        errorMsg: {
+            required: 'This question is required.',
+            pattern: "Use letters, spaces, hyphens, apostrophes, and periods only."
+        }
+    });
+
+    API.addQuestionsSet('participantEmail',{
+        inherit: 'demographicsText',
+        name: 'email',
+        stem: 'Please enter your email address. If you are eligible for and complete the study, this email will be used to enter you into the raffle for a $20 Amazon gift card.',
+        inputType: 'email',
+        maxLength: 254,
+        errorMsg: {
+            required: 'This question is required.',
+            pattern: 'Please enter a valid email address.'
+        }
+    });
+
+    API.addQuestionsSet('educationStudent',{
         inherit: 'demographicsSelect',
         name: 'education_student',
         stem: 'Are you currently a student studying education?',
@@ -1202,17 +1268,12 @@ define(['questAPI'], function(Quest){
         ]
 	}); 
 
-    API.addQuestionsSet('raffleEmail',{
-        inherit: 'demographicsText',
-        name: 'raffle_email',
-        required: false,
-        stem: 'If you are interested in being entered into the raffle to win a $20 Amazon gift card, please enter your email (Please note that you must be eligible for, and complete the study to be entered into the raffle to win the gift card):',
-        inputType: 'email'
-    });
 
     API.addSequence([{
         inherit: 'demographicsPage',
         questions: [
+            {inherit: 'participantName'},
+            {inherit: 'participantEmail'},
             {inherit: 'educationStudent'},
             {inherit: 'studentLevel'},
             {inherit: 'yearOfStudy'},
@@ -1227,8 +1288,7 @@ define(['questAPI'], function(Quest){
             {inherit: 'raceOther'},
             {inherit: 'ethnicity'},
             {inherit: 'englishComprehension'},
-            {inherit: 'keyboardDevice'},
-            {inherit: 'raffleEmail'}
+            {inherit: 'keyboardDevice'}
         ]
     }]);
 
