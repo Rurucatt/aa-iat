@@ -23,10 +23,28 @@
             .exit-message p { margin-top: 1.5em; font-size: 1.3em; line-height: 1.5; }
             [hidden] { display: none !important; }
             @media (max-width: 600px) {
-                .study-blurb { padding: 10px; }
-                .study-blurb__heading { font-size: 1.6em; }
-                .study-blurb__body { font-size: 1em; }   
-			}
+                html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
+                body { font-size: 16px; }
+                .container { width: 100%; padding: 8px !important; }
+                .panel { max-width: 100%; margin-left: 0; margin-right: 0; }
+                .panel-body { padding: 12px; }
+                .study-blurb { width: 100%; padding: 8px; }
+                .study-blurb__heading { font-size: 1.55em; }
+                .study-blurb__body { font-size: 1em; }
+                .exit-message { width: 100%; margin: 5vh auto; padding: 8px; }
+                img { max-width: 100%; height: auto; }
+                a { overflow-wrap: anywhere; }
+                [pi-quest] h3 { font-size: 1.5em !important; line-height: 1.25; }
+                [piq-page] > ol { margin: 10px !important; padding-left: 0; }
+                [piq-page] .form-control,
+                [piq-page] input,
+                [piq-page] textarea,
+                [piq-page] select { max-width: 100%; min-height: 44px; font-size: 16px; }
+                [pi-quest] .btn-toolbar { margin: 12px 0 !important; }
+                [pi-quest] [ng-click="submit()"],
+                [pi-quest] [data-ng-click="submit()"],
+                button[pi-message-done] { width: 100% !important; min-height: 44px; white-space: normal; }
+            }
         /* </script> */
 		</style>
     </head>

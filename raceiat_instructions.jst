@@ -3,6 +3,59 @@
     if (global.$isTouch)  respInst = "you will";
 %>
 
+<style>
+	.task-instructions-table img {
+		margin: 2px;
+	}
+
+	@media (max-width: 600px) {
+		.task-instructions-table {
+			font-size: 1.05em !important;
+			border: 0;
+		}
+
+		.task-instructions-table tr:first-child {
+			display: none;
+		}
+
+		.task-instructions-table,
+		.task-instructions-table tbody,
+		.task-instructions-table tr,
+		.task-instructions-table th,
+		.task-instructions-table td {
+			display: block;
+			width: 100%;
+		}
+
+		.task-instructions-table tr {
+			margin-bottom: 12px;
+			border: 1px solid #ddd;
+		}
+
+		.task-instructions-table th,
+		.task-instructions-table td {
+			border: 0 !important;
+		}
+
+		.task-instructions-table th {
+			background: #f5f5f5;
+		}
+
+		.task-instructions-image-grid {
+			display: grid !important;
+			grid-template-columns: repeat(3, minmax(0, 60px));
+			gap: 6px;
+			justify-content: start;
+		}
+
+		.task-instructions-image-grid img {
+			width: 60px;
+			height: 60px;
+			margin: 0;
+			object-fit: cover;
+		}
+	}
+</style>
 <div class="panel panel-info" style="margin-top:1em">
 		<div class="panel-heading">
 			<h1 class="panel-title" style="font-size:2em">
@@ -18,7 +71,7 @@
 	<p class="lead">Next, <%=respInst%> categorize items into groups as fast as you can. 
 	These are the four groups and the items that belong to each:</p>
 
-	<table class="table table-bordered" style="font-size: 1.18em; line-height: 1.45;">
+	<table class="table table-bordered task-instructions-table" style="font-size: 1.18em; line-height: 1.45;">
 		<tr class="active">
 			<th>Category</th>
 			<th>Items</th>
@@ -35,7 +88,7 @@
 		</tr>
 		<tr>
 			<th><%=global.asianLabels%></th>
-	<td>
+	<td class="task-instructions-image-grid">
 		  <img src="<%=global.baseURL%>FAS04.jpg" height=60>
 		  <img src="<%=global.baseURL%>FAS05.jpg" height=60>
 		  <img src="<%=global.baseURL%>FAS07.jpg" height=60>
@@ -48,7 +101,7 @@
 		</tr>
 		<tr>
 			<th><%=global.whiteLabels%></th>
-			<td>    
+			<td class="task-instructions-image-grid">
 			  <img src="<%=global.baseURL%>FEA15.jpg" height=60>
 			  <img src="<%=global.baseURL%>FEA23.jpg" height=60>
 			  <img src="<%=global.baseURL%>FEA36.jpg" height=60>

@@ -4,8 +4,49 @@ define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
     
     let API = new APIConstructor();
     let global = API.getGlobal();
+
+    function getResponsiveCanvas(){
+        var viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+        var viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+        var isLandscape = viewportWidth > viewportHeight;
+        var useCompactLandscape = isLandscape && (global.$isTouch || viewportWidth <= 1024);
+
+        if (!useCompactLandscape){
+            return {
+                maxWidth: 725,
+                proportions: 0.7,
+                background: '#ffffff',
+                borderWidth: 5,
+                canvasBackground: '#ffffff',
+                borderColor: 'lightblue',
+                css: {'touch-action': 'manipulation'}
+            };
+        }
+
+        var horizontalMargin = 24;
+        var verticalMargin = 20;
+        var maxWidth = Math.min(1200, Math.max(320, viewportWidth - horizontalMargin));
+        var availableHeight = Math.max(220, viewportHeight - verticalMargin);
+        var proportions = Math.min(0.62, availableHeight / maxWidth);
+        proportions = Math.max(0.42, proportions);
+
+        return {
+            maxWidth: Math.floor(maxWidth),
+            proportions: proportions,
+            background: '#ffffff',
+            borderWidth: 5,
+            canvasBackground: '#ffffff',
+            borderColor: 'lightblue',
+            css: {'touch-action': 'manipulation'}
+        };
+    }
+
+    var responsiveCanvas = getResponsiveCanvas();
+    var compactLandscape = (window.innerWidth || 0) > (window.innerHeight || 0) && (global.$isTouch || (window.innerWidth || 0) <= 1024);
       
     return iatExtension({
+        canvas: responsiveCanvas,
+        touchInputWidth: compactLandscape ? 34 : 30,
         blockAttributes_nTrials: 12, // trial number of block 1
 		blockAttributes_nMiniBlocks: 6, // 14/7=2 trials per mini-block (must be divisible)
 		
@@ -41,7 +82,7 @@ define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
                 {image: 'MAS06.jpg'}
             ],
             //Stimulus css (style)
-            stimulusCss : {color:'#31940F','font-size':'2.3em'}
+            stimulusCss : Object.assign({color:'#31940F','font-size':'2.3em'}, compactLandscape ? {maxWidth:'48%', maxHeight:'52%'} : {})
         },    
         category2 : {
             name : global.whiteLabels, //Will appear in the data.
@@ -59,7 +100,7 @@ define(['pipAPI','./iat10lib.js'], function(APIConstructor, iatExtension){
                 {image: 'MEA14.jpg'},
             ],
             //Stimulus css (style)
-            stimulusCss : {color:'#31940F','font-size':'2.3em'}
+            stimulusCss : Object.assign({color:'#31940F','font-size':'2.3em'}, compactLandscape ? {maxWidth:'48%', maxHeight:'52%'} : {})
         },
         attribute1 : {
             name : 'Bad Student',

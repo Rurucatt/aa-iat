@@ -171,7 +171,8 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
 			finalTouchText : 'Touch the bottom green area to continue to the next task',
 
 			touchMaxStimulusWidth : '50%', 
-			touchMaxStimulusHeight : '50%', 
+			touchMaxStimulusHeight : '50%',
+			touchInputWidth : 30,
 			bottomTouchCss: {}, //Add any CSS value you want for changing the css of the bottom touch area.
 
 			//Instructions text.
@@ -608,8 +609,8 @@ define(['pipAPI','pipScorer','underscore'], function(APIConstructor, Scorer, _) 
 			}],
 
 			touchInputStimuli: [
-				{media:{html:'<div></div>'}, size:{height:48,width:30},css:{background:'#00FF00', opacity:0.3, zindex:-1}, location:{right:0}, data:{handle:'right'}},
-				{media:{html:'<div></div>'}, size:{height:48,width:30},css:{background:'#00FF00', opacity:0.3, zindex:-1}, location:{left:0}, data:{handle:'left'}}
+				{media:{html:'<div></div>'}, size:{height:48,width:piCurrent.touchInputWidth},css:{background:'#00FF00', opacity:0.3, zindex:-1}, location:{right:0}, data:{handle:'right'}},
+				{media:{html:'<div></div>'}, size:{height:48,width:piCurrent.touchInputWidth},css:{background:'#00FF00', opacity:0.3, zindex:-1}, location:{left:0}, data:{handle:'left'}}
 			]
 		});
 
